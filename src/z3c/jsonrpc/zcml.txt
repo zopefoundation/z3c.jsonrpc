@@ -1,0 +1,75 @@
+==========
+Directives
+==========
+
+JSONRPC directive
+-----------------
+
+Show how we can use the jsonrpc directive. Register the meta configuration for 
+the directive.
+
+  >>> from zope.configuration import xmlconfig
+  >>> import z3c.jsonrpc
+  >>> context = xmlconfig.file('meta.zcml', z3c.jsonrpc)
+
+Now register the view defined in the testing module within the ``z3c:jsonrpc``
+directive:
+
+  >>> context = xmlconfig.string("""
+  ... <configure
+  ...     xmlns:z3c="http://namespaces.zope.org/z3c">
+  ...   <z3c:jsonrpc
+  ...       for="z3c.jsonrpc.testing.IA"
+  ...       class="z3c.jsonrpc.testing.MethodsA"
+  ...       permission="zope.Public"
+  ...       methods="hello"
+  ...       />
+  ... </configure>
+  ... """, context)
+
+Let's check if the view is registered as adapter:
+
+  >>> import zope.component
+  >>> from z3c.jsonrpc.testing import A
+  >>> from z3c.jsonrpc.testing import TestRequest
+  >>> a = A()
+  >>> request = TestRequest()
+  >>> zope.component.queryMultiAdapter((a, request), name='hello')
+  <z3c.jsonrpc.zcml.MethodsA object at ...>
+
+We can also use a layer interface wich will restrict our view registration to
+a specific request type. Provide such a request type layer:
+
+  >>> from z3c.jsonrpc.testing import IJSONRPCTestLayer
+  >>> demoRequest = TestRequest()
+  >>> zope.interface.directlyProvides(demoRequest, IJSONRPCTestLayer)
+
+And register a new JSON-RPC view:
+
+  >>> context = xmlconfig.string("""
+  ... <configure
+  ...     xmlns:z3c="http://namespaces.zope.org/z3c">
+  ...   <z3c:jsonrpc
+  ...       for="z3c.jsonrpc.testing.IB"
+  ...       class="z3c.jsonrpc.testing.MethodsB"
+  ...       permission="zope.Public"
+  ...       methods="hello"
+  ...       layer="z3c.jsonrpc.testing.IJSONRPCTestLayer"
+  ...       />
+  ... </configure>
+  ... """, context)
+
+Setup a new content stub:
+
+  >>> from z3c.jsonrpc.testing import B
+  >>> b = B()
+
+And test the view within our new layer:
+
+  >>> zope.component.queryMultiAdapter((b, demoRequest), name='hello')
+  <z3c.jsonrpc.zcml.MethodsB object at ...>
+
+Note the object b does not know the view within the default request layer:
+
+  >>> zope.component.queryMultiAdapter((b, request), name='hello') is None
+  True

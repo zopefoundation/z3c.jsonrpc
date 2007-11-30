@@ -1,0 +1,70 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="zope">
+
+
+  <interface
+      interface="z3c.jsonrpc.layer.IJSONRPCLayer"
+      type="zope.publisher.interfaces.browser.IBrowserSkinType"
+      />
+
+
+  <!-- JSON-RPC server -->
+  <publisher
+      name="Z3C JSONRPC"
+      factory=".publication.JSONRPCFactory"
+      methods="POST"
+      mimetypes="application/json application/json-rpc"
+      priority="30"
+      />
+
+  <!-- publisher -->
+  <view
+      for="zope.interface.Interface"
+      type=".interfaces.IJSONRPCRequest"
+      provides=".interfaces.IJSONRPCPublisher"
+      factory="zope.app.publication.traversers.SimpleComponentTraverser"
+      permission="zope.Public"
+      />
+
+  <view
+      for="zope.app.container.interfaces.IItemContainer"
+      type=".interfaces.IJSONRPCRequest"
+      provides=".interfaces.IJSONRPCPublisher"
+      factory="zope.app.container.traversal.ItemTraverser"
+      permission="zope.Public"
+      />
+
+  <view
+      for="zope.app.container.interfaces.IReadContainer"
+      type=".interfaces.IJSONRPCRequest"
+      provides=".interfaces.IJSONRPCPublisher"
+      factory="zope.app.container.traversal.ContainerTraverser"
+      permission="zope.Public"
+      />
+
+  <view
+      for=".interfaces.IMethodPublisher"
+      type=".interfaces.IJSONRPCRequest"
+      provides=".interfaces.IJSONRPCPublisher"
+      factory=".publisher.MethodTraverser"
+      permission="zope.Public"
+      />
+
+
+  <!-- skin namespace -->
+  <view
+      name="skin" type="z3c.jsonrpc.interfaces.IJSONRPCRequest"
+      provides="zope.traversing.interfaces.ITraversable" for="*"
+      factory=".namespace.skin"
+      />
+
+
+  <!-- error handling -->
+  <defaultView
+      for="zope.interface.common.interfaces.IException"
+      type=".layer.IJSONRPCLayer"
+      name="error"
+      />
+
+</configure>

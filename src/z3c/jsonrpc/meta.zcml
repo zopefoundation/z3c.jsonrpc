@@ -1,0 +1,14 @@
+<configure
+    xmlns:meta="http://namespaces.zope.org/meta"
+    xmlns="http://namespaces.zope.org/zope">
+    
+  <meta:directive
+       namespace="http://namespaces.zope.org/z3c"
+       name="jsonrpc"
+       schema=".zcml.IJSONRPCDirective"
+       handler=".zcml.jsonrpc"
+       />
+       
+    <meta:provides feature="z3c.jsonrpc" />
+
+</configure>

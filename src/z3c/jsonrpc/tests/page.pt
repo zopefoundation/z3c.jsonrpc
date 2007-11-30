@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>z3c.jsonrpc.demo</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta http-equiv="cache-control" content="no-cache" />
+<script type="text/javascript" src="xmlhttp.js"
+        tal:attributes="src context/++resource++xmlhttp.js"> </script>
+<script type="text/javascript" src="jsonrpc.js"
+        tal:attributes="src context/++resource++jsonrpc.js"> </script>
+<script type="text/javascript"
+        tal:define="contexturl context/@@absolute_url; 
+                    viewurl request/URL"
+        tal:content="string:
+	var contextURL = '${contexturl}';
+	var viewURL = '${viewurl}';"> 
+</script>
+<script type="text/javascript" language="javascript">
+// helloworld
+function helloworld() {
+    var jsonProxy = new JSONRPC(contextURL);
+    jsonProxy.addMethod('helloworld');
+    response = jsonProxy.helloworld();
+	alert(response);
+}
+// hello
+function hello(name) {
+	var name = document.getElementById('helloInput').value;
+    var jsonProxy = new JSONRPC(contextURL);
+    jsonProxy.addMethod('hello');
+    response = jsonProxy.hello(name);
+	document.getElementById('helloOutput').value = response;
+}
+
+// kwargs
+function kwargs(name) {
+    var jsonProxy = new JSONRPC(contextURL);
+    jsonProxy.addMethod('kwargs');
+	postitional = 'postional value'
+	// firstMNamedMissing (not userd)
+    // secondNamedMissing (not userd)
+	var kws = new Object();
+	kws['thirdNamed'] = 'third value';
+	kws['lastNamed'] = 'last value';
+    response = jsonProxy.kwargs(postitional, kws);
+	document.getElementById('postional').innerHTML = response.postional;
+	document.getElementById('first').innerHTML = response.first;
+	document.getElementById('second').innerHTML = response.second;
+	document.getElementById('third').innerHTML = response.third;
+	document.getElementById('last').lastNamed = response.last;
+}
+
+// call intro
+alertIntro();
+</script>
+<style type="text/css">
+body {
+    font: 11px Verdana, Helvetica, Arial, sans-serif;
+}
+.red {
+    color: red;
+}
+</style>
+</head>
+<body>
+  <h2>JSONRPC demo page</h2>
+  <h3>1. Sample</h3>
+  <h4>Simple *Hello World* sample</h4>
+  <pre>
+function helloworld() {
+    var jsonProxy = new JSONRPC(contextURL);
+    jsonProxy.addMethod('helloworld');
+    response = jsonProxy.helloworld();
+	alert(response);
+}
+  </pre>
+  <div>
+  <input type="button" onClick="helloworld(); return false;" value="Hello world" />
+  </div>
+  <h3>2. Sample</h3>
+  <h4>This sample uses one positional argument</h4>
+  <pre>
+function hello(name) {
+	var name = document.getElementById('helloInput').value;
+    var jsonProxy = new JSONRPC(contextURL);
+    jsonProxy.addMethod('hello');
+    response = jsonProxy.hello(name);
+	document.getElementById('helloOutput').value = response;
+}
+  </pre>
+  <div>
+  <input type="text" onBlur="hello(); return false;" id="helloInput" value="" />
+  <input type="button" onClick="hello(); return false;" value="Add your name to the left field and click here" />
+  </div>
+  <div><input type="text" id="helloOutput" value="" /></div>
+  <h3>3. Sample</h3>
+  <h4>JSONRPC call with postional and named arguments.</h4>
+  <h3><span class="red">(NOTE, this fails in JSONRPC version 1.0)</span></h3>
+  <pre>
+
+  </pre>
+  <div>
+  <input type="button" onClick="kwargs(); return false;" value="Hello world" />
+  </div>
+  <div>positional: <span class="red" id="postional"></span></div>
+  <div>firstNamedMissing:<span class="red" id="first"></span></div>
+  <div>secondNamedMissing: <span class="red" id="second"></span></div>
+  <div>thirdNamed: <span class="red" id="third"></span></div>
+  <div>lastNamed: <span class="red" id="last"></span></div>
+</body>
+</html>
