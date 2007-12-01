@@ -7,26 +7,26 @@ as XML-RPC, except the transport is JSON instead of XML.
 
 Many thanks to Jim Washington for the work on zif.jsonserver. This project uses
 many code writen by Jim. I implemented an additional python JSONRPC proxy which 
-can comunicate with the server. This means we can use this library for call 
+can communicate with the server. This means we can use this library to call 
 JSON from python to python. The JSON-RPC proxy uses similar patterns like the 
 XML-RPC implementation.
 
-There is also a additional xmlhttp and json javascript implementation wich
+There is also an additional xmlhttp and json javascript implementation which
 offers a JSON-RPC proxy implementation for JavaScript.
 
 This project provides the proposed request type "application/json". The request
 type "application/json-rpc" is supported as long it is not officialy deprecated.
 
-The goal of this project is to provide a JSON-RPC implementation. Simply 
-Browser views wihch handle JSON calls with a BrowserRequest are not supported
+The goal of this project is to provide a JSON-RPC implementation. Simple 
+Browser views which handle JSON calls with a BrowserRequest are not supported
 by this package. I'm still not sure if this is good or bad and in which 
 direction I will go with this package.
 
 Some of my goals are right now, but can change in the future if I'll understand
-all the concepts arround JSON, e.g. JSPON, JSONP, CrossSite etc:
+all the concepts around JSON, e.g. JSPON, JSONP, CrossSite etc:
 
 - provide a secure way to handle JSON calls from client to server.
-  I hope we can implement JSONRequest some days. CrosSite seems to use a
+  I hope we can implement JSONRequest some days. CrossSite seems to use a
   intereting concept
 
 - Simple pythonic implementation
@@ -60,7 +60,7 @@ not handle the following tasks:
 Note that the JSONRPCRequest implementation is based on the IHTTPRequest, this
 means that there is no other browser page available if you call them in 
 python, e.g. getMultiAdapter((context, request), name='myViewName'). This is
-explicit done this way. If you like to use content form such browser pages
+explicitly done this way. If you'd like to use content form such browser pages
 in a JSON request/call, you can inherit your skin form IJSONRPCLayer and
 IBrowserRequest and register your views for this custom layer.
 
@@ -70,7 +70,7 @@ JSON-RPC server
 
 The JSON server looks for content-type "application/json", and handles those 
 requests as JSON-RPC. The official mime-type for JSON is "application/json"
-Old content types ``application/json-rpc`` are supported too.
+The old content type ``application/json-rpc`` is supported too.
 
 Let's define a content object:
 
@@ -204,7 +204,7 @@ self.request['foo'].Also note that we don't support the **kw signature:
   >>> proxy.kwarguments('Hello', foo=u'FOO', bar=u'BAR')
   u'Hello FOO BAR'
 
-There is also a ``id`` in the json response. Let's use such a json request id
+There is also an ``id`` in the json response. Let's use such a json request id
 in our JSONRPCProxy:
 
   >>> proxy = JSONRPCTestProxy(siteURL + '/content', jsonId = u'my id')
@@ -216,7 +216,7 @@ The proxy also knows this id as jsonId:
   >>> proxy.jsonId
   u'my id'
 
-See what's happen if the server raises a Exception:
+See what happens if the server raises an Exception:
 
   >>> proxy.forceValueError()
   Traceback (most recent call last):
