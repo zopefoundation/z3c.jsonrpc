@@ -24,7 +24,6 @@ from zope.testing import doctest
 from zope.app.testing import functional
 from zope.app.testing.functional import HTTPCaller
 
-from z3c.layer.minimal import IMinimalBrowserLayer
 from z3c.json.interfaces import IJSONReader
 from z3c.json.converter import JSONReader
 from z3c.json.exceptions import ProtocolError
