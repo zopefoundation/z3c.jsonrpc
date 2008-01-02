@@ -105,6 +105,42 @@ And define a JSONRPC method view:
   ...     def forceValueError(self):
   ...         raise ValueError('Something was wrong in server method.')
 
+Let's define a content object that is a container:
+
+  >>> import zope.interface
+  >>> class IDemoContainer(zope.app.container.interfaces.IReadContainer):
+  ...     """Demo container interface."""
+
+  >>> import persistent
+  >>> from zope.app.container import btree
+
+  >>> class DemoContainer(btree.BTreeContainer):
+  ...     """Demo container."""
+  ...     zope.interface.implements(IDemoContainer)
+
+And define a JSONRPC method view:
+
+  >>> from z3c.jsonrpc import publisher
+  >>> class DemoContainerView(publisher.MethodPublisher):
+  ...     """Sample JSON view."""
+  ... 
+  ...     def available(self):
+  ...         return u"Hello World"
+  ... 
+  ...     def greeting(self, name):
+  ...         return u"Hello %s" % name
+  ... 
+  ...     def kwarguments(self, prefix, foo=None, bar=None):
+  ...         # Note; keyword arguments can be found in request.form
+  ...         return u"%s %s %s" % (prefix, foo, bar)
+  ... 
+  ...     def showId(self):
+  ...         return u"The json id is: %s" % self.request.jsonId
+  ... 
+  ...     def forceValueError(self):
+  ...         raise ValueError('Something was wrong in server method.')
+
+
 Make them available under the fake package ``jsonsamples``:
 
   >>> import sys
@@ -112,6 +148,9 @@ Make them available under the fake package ``jsonsamples``:
   >>> sys.modules['custom'].IDemoContent = IDemoContent
   >>> sys.modules['custom'].DemoContent = DemoContent
   >>> sys.modules['custom'].DemoView = DemoView
+  >>> sys.modules['custom'].IDemoContainer = IDemoContainer
+  >>> sys.modules['custom'].DemoContainer = DemoContainer
+  >>> sys.modules['custom'].DemoContainerView = DemoContainerView
 
 Let's show how we can register a jsonrpc view:
 
@@ -131,11 +170,38 @@ Let's show how we can register a jsonrpc view:
   ... </configure>
   ... """, context)
 
+Let's show how we can register a jsonrpc view for the container:
+(The container class needs permission configuration too)
+
+  >>> context = xmlconfig.file('meta.zcml', z3c.jsonrpc)
+  >>> context = xmlconfig.file('meta.zcml', zope.app.component, context)
+  >>> context = xmlconfig.string("""
+  ... <configure
+  ...     xmlns:z3c="http://namespaces.zope.org/z3c"
+  ...     xmlns="http://namespaces.zope.org/zope">
+  ...     <class class="custom.DemoContainer">
+  ...       <allow
+  ...           interface="custom.IDemoContainer"
+  ...           />
+  ...     </class>
+  ...   <z3c:jsonrpc
+  ...       for="custom.IDemoContainer"
+  ...       class="custom.DemoContainerView"
+  ...       permission="zope.Public"
+  ...       methods="available greeting kwarguments showId forceValueError"
+  ...       layer="z3c.jsonrpc.testing.IJSONRPCTestSkin"
+  ...       />
+  ... </configure>
+  ... """, context)
+
+
 Now we will setup a content object in our site:
 
   >>> site  = getRootFolder()
   >>> content = DemoContent()
   >>> site['content'] = content
+  >>> container = DemoContainer()
+  >>> site['container'] = container
 
 Now we can call the method from our JSONRPC view:
 
@@ -190,6 +256,11 @@ Let's try to call our method called ``hello`` we defined before:
   >>> proxy = JSONRPCTestProxy(siteURL + '/content')
   >>> proxy.hello()
   u'Hello World'
+
+  >>> p2 = JSONRPCTestProxy(siteURL + '/container')
+  >>> p2.available()
+  u'Hello World'
+
 
 Now let's make a remote procedure call with a argument:
 
