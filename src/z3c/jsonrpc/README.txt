@@ -299,6 +299,12 @@ and the error message is:
   >>> proxy.error
   u'ValueError: Something was wrong in server method.'
 
+The error property gets reset on the next successfull call:
+
+  >>> x = proxy.showId()
+  >>> proxy.error is None
+  True
+
 And now we force a ResponseError with a fake JSONReader. But first we
 need to replace our IJSONReader utility:
 
