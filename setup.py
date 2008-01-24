@@ -23,12 +23,19 @@ def read(*rnames):
 
 setup (
     name='z3c.jsonrpc',
-    version='0.5.1dev',
+    version='0.5.1',
     author = "Roger Ineichen and the Zope Community",
-    author_email = "zope3-dev@zope.org",
+    author_email = "zope-dev@zope.org",
     description = "JSON RPC server and client implementation for Zope3",
     long_description=(
         read('README.txt')
+        + '\n\n' +
+        'Detailed Documentation\n'
+        '**********************'
+        + '\n\n' +
+        read('src', 'z3c', 'jsonrpc', 'README.txt')
+        + '\n\n' +
+        read('src', 'z3c', 'jsonrpc', 'zcml.txt')
         + '\n\n' +
         read('CHANGES.txt')
         ),
@@ -44,7 +51,7 @@ setup (
         'Operating System :: OS Independent',
         'Topic :: Internet :: WWW/HTTP',
         'Framework :: Zope3'],
-    url = 'http://cheeseshop.python.org/pypi/z3c.jsonrpc',
+    url = 'http://pypi.python.org/pypi/z3c.jsonrpc',
     packages = find_packages('src'),
     include_package_data = True,
     package_dir = {'':'src'},

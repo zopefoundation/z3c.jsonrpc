@@ -6,9 +6,9 @@ JSON is javascript object notation. JSON-RPC performs the same service
 as XML-RPC, except the transport is JSON instead of XML.
 
 Many thanks to Jim Washington for the work on zif.jsonserver. This project uses
-many code writen by Jim. I implemented an additional python JSONRPC proxy which 
-can communicate with the server. This means we can use this library to call 
-JSON from python to python. The JSON-RPC proxy uses similar patterns like the 
+many code writen by Jim. I implemented an additional python JSONRPC proxy which
+can communicate with the server. This means we can use this library to call
+JSON from python to python. The JSON-RPC proxy uses similar patterns like the
 XML-RPC implementation.
 
 There is also an additional xmlhttp and json javascript implementation which
@@ -17,9 +17,9 @@ offers a JSON-RPC proxy implementation for JavaScript.
 This project provides the proposed request type "application/json". The request
 type "application/json-rpc" is supported as long it is not officialy deprecated.
 
-The goal of this project is to provide a JSON-RPC implementation. Simple 
+The goal of this project is to provide a JSON-RPC implementation. Simple
 Browser views which handle JSON calls with a BrowserRequest are not supported
-by this package. I'm still not sure if this is good or bad and in which 
+by this package. I'm still not sure if this is good or bad and in which
 direction I will go with this package.
 
 Some of my goals are right now, but can change in the future if I'll understand
@@ -58,7 +58,7 @@ not handle the following tasks:
 - Handle GET request
 
 Note that the JSONRPCRequest implementation is based on the IHTTPRequest, this
-means that there is no other browser page available if you call them in 
+means that there is no other browser page available if you call them in
 python, e.g. getMultiAdapter((context, request), name='myViewName'). This is
 explicitly done this way. If you'd like to use content form such browser pages
 in a JSON request/call, you can inherit your skin form IJSONRPCLayer and
@@ -68,7 +68,7 @@ IBrowserRequest and register your views for this custom layer.
 JSON-RPC server
 ---------------
 
-The JSON server looks for content-type "application/json", and handles those 
+The JSON server looks for content-type "application/json", and handles those
 requests as JSON-RPC. The official mime-type for JSON is "application/json"
 The old content type ``application/json-rpc`` is supported too.
 
@@ -88,20 +88,20 @@ And define a JSONRPC method view:
   >>> from z3c.jsonrpc import publisher
   >>> class DemoView(publisher.MethodPublisher):
   ...     """Sample JSON view."""
-  ... 
+  ...
   ...     def hello(self):
   ...         return u"Hello World"
-  ... 
+  ...
   ...     def greeting(self, name):
   ...         return u"Hello %s" % name
-  ... 
+  ...
   ...     def kwarguments(self, prefix, foo=None, bar=None):
   ...         # Note; keyword arguments can be found in request.form
   ...         return u"%s %s %s" % (prefix, foo, bar)
-  ... 
+  ...
   ...     def showId(self):
   ...         return u"The json id is: %s" % self.request.jsonId
-  ... 
+  ...
   ...     def forceValueError(self):
   ...         raise ValueError('Something was wrong in server method.')
 
@@ -123,20 +123,20 @@ And define a JSONRPC method view:
   >>> from z3c.jsonrpc import publisher
   >>> class DemoContainerView(publisher.MethodPublisher):
   ...     """Sample JSON view."""
-  ... 
+  ...
   ...     def available(self):
   ...         return u"Hello World"
-  ... 
+  ...
   ...     def greeting(self, name):
   ...         return u"Hello %s" % name
-  ... 
+  ...
   ...     def kwarguments(self, prefix, foo=None, bar=None):
   ...         # Note; keyword arguments can be found in request.form
   ...         return u"%s %s %s" % (prefix, foo, bar)
-  ... 
+  ...
   ...     def showId(self):
   ...         return u"The json id is: %s" % self.request.jsonId
-  ... 
+  ...
   ...     def forceValueError(self):
   ...         raise ValueError('Something was wrong in server method.')
 
@@ -219,8 +219,8 @@ with the traverser:
   >>> methodTraverser.publishTraverse(request, 'hello')()
   u'Hello World'
 
-Now we try to access the JSON-RPC view method with a test browser. As you can 
-see, there is no view accessible. This is because the JSONRPC view is not a 
+Now we try to access the JSON-RPC view method with a test browser. As you can
+see, there is no view accessible. This is because the JSONRPC view is not a
 browser view and is not traversable. The error shows that the request factory
 falls back to the browser request factory:
 
@@ -246,7 +246,7 @@ below in the ``JSON-RPC proxy`` section.
 JSON-RPC proxy
 --------------
 
-The jsonrpc package provides also a JSON-RPC proxy implementation. This 
+The jsonrpc package provides also a JSON-RPC proxy implementation. This
 implementation is similar to the one known from xmlrpclib except that it can
 handle JSON instead of XML.
 
@@ -267,9 +267,9 @@ Now let's make a remote procedure call with a argument:
   >>> proxy.greeting(u'Jessy')
   u'Hello Jessy'
 
-Now let's make a remote procedure call with a kw arguments. Note that this 
-key word arguments are stored in the request.form. But this doesn't change 
-anything because this varaibles are also accessible like form variables e.g. 
+Now let's make a remote procedure call with a kw arguments. Note that this
+key word arguments are stored in the request.form. But this doesn't change
+anything because this varaibles are also accessible like form variables e.g.
 self.request['foo'].Also note that we don't support the **kw signature:
 
   >>> proxy.kwarguments('Hello', foo=u'FOO', bar=u'BAR')
@@ -336,9 +336,9 @@ Transport
 ~~~~~~~~~
 
 We used the JSONRPCTestProxy here for testing. This JSON-RPC proxy is a wrapper
-for the original JSONRPCProxy and adds handleErrors support and a special 
-Transport layer which uses a testing caller. You can use one of the different 
-Transport layers defined in the z3c.json.transport module in real usecases 
+for the original JSONRPCProxy and adds handleErrors support and a special
+Transport layer which uses a testing caller. You can use one of the different
+Transport layers defined in the z3c.json.transport module in real usecases
 together with the default JSONRPCProxy implementation.
 
 
