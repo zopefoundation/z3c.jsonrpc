@@ -18,6 +18,8 @@ __docformat__ = "reStructuredText"
 
 import traceback
 import logging
+from StringIO import StringIO
+from tempfile import TemporaryFile
 
 import zope.interface
 import zope.component
@@ -26,6 +28,7 @@ from zope.i18n.interfaces import IUserPreferredCharsets
 from zope.publisher.http import HTTPRequest
 from zope.publisher.http import HTTPResponse
 from zope.publisher.http import getCharsetUsingRequest
+from zope.publisher.http import HTTPInputStream
 from zope.security.proxy import isinstance
 
 from z3c.json.interfaces import IJSONReader
@@ -73,6 +76,18 @@ class MethodTraverser(object):
     def publishTraverse(self, request, name):
         return getattr(self.context, name)
 
+class JSONInputStream(HTTPInputStream):
+    def __init__(self, stream, environment):
+        self.stream = stream
+        size = environment.get('CONTENT_LENGTH')
+        # There can be no size in the environment (None) or the size
+        # can be an empty string, in which case we treat it as absent.
+        if not size:
+            size = environment.get('HTTP_CONTENT_LENGTH')
+        if not size or int(size) < 65536:
+            self.cacheStream = StringIO()
+        else:
+            self.cacheStream = TemporaryFile()
 
 class JSONRPCRequest(HTTPRequest):
     """JSON-RPC request implementation based on IHTTPRequest."""
@@ -87,7 +102,12 @@ class JSONRPCRequest(HTTPRequest):
         self.form = {}
         self._args = ()
         self.charsets = None
+
         super(JSONRPCRequest, self).__init__(body_instream, environ, response)
+
+        #this fixes that the input stream gets str instead of unicode
+        #HTTPInputStream breaks it with cStringIO
+        self._body_instream = JSONInputStream(body_instream, environ)
 
     def _createResponse(self):
         """return a response"""
@@ -198,6 +218,23 @@ class JSONRPCRequest(HTTPRequest):
 
     def __getitem__(self,key):
         return self.get(key)
+
+    #def retry(self):
+    #    #retry
+    #    #implemented here, because HTTPRequest's retry messes up unicode to str
+    #    count = getattr(self, '_retry_count', 0)
+    #    self._retry_count = count + 1
+    #
+    #    new_response = self.response.retry()
+    #    request = self.__class__(
+    #        # Use the cache stream as the new input stream.
+    #        body_instream=self._body_instream.getCacheStream(),
+    #        environ=self._orig_env,
+    #        response=new_response,
+    #        )
+    #    request.setPublication(self.publication)
+    #    request._retry_count = self._retry_count
+    #    return request
 
 
 class JSONRPCResponse(HTTPResponse):
