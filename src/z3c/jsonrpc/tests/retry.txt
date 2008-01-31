@@ -10,41 +10,9 @@ The JSON server looks for content-type "application/json", and handles those
 requests as JSON-RPC. The official mime-type for JSON is "application/json"
 The old content type ``application/json-rpc`` is supported too.
 
-Let's define a content object:
-
-  >>> import zope.interface
-  >>> class IDemoContent(zope.interface.Interface):
-  ...     """Demo content interface."""
-
-  >>> import persistent
-  >>> class DemoContent(persistent.Persistent):
-  ...     """Demo content."""
-  ...     zope.interface.implements(IDemoContent)
-
-And define a JSONRPC method view:
-
-  >>> class Conflict(Exception):
-  ...     pass
-  >>> from zope.publisher.interfaces import Retry
-
-  >>> from z3c.jsonrpc import publisher
-  >>> import sys
-  >>> class DemoView(publisher.MethodPublisher):
-  ...     """Sample JSON view."""
-  ...
-  ...     def fail(self):
-  ...         try:
-  ...             raise Conflict
-  ...         except:
-  ...             raise Retry(sys.exc_info())
-
-Make them available under the fake package ``jsonsamples``:
-
-  >>> import sys
-  >>> sys.modules['custom'] = type('Module', (), {})()
-  >>> sys.modules['custom'].IDemoContent = IDemoContent
-  >>> sys.modules['custom'].DemoContent = DemoContent
-  >>> sys.modules['custom'].DemoView = DemoView
+  >>> from z3c.jsonrpc.tests.test_retry import IDemoContent
+  >>> from z3c.jsonrpc.tests.test_retry import DemoContent
+  >>> from z3c.jsonrpc.tests.test_retry import DemoView
 
 Let's show how we can register a jsonrpc view:
 
@@ -55,10 +23,10 @@ Let's show how we can register a jsonrpc view:
   ... <configure
   ...     xmlns:z3c="http://namespaces.zope.org/z3c">
   ...   <z3c:jsonrpc
-  ...       for="custom.IDemoContent"
-  ...       class="custom.DemoView"
+  ...       for="z3c.jsonrpc.tests.test_retry.IDemoContent"
+  ...       class="z3c.jsonrpc.tests.test_retry.DemoView"
   ...       permission="zope.Public"
-  ...       methods="fail"
+  ...       methods="goodResult badResult"
   ...       layer="z3c.jsonrpc.testing.IJSONRPCTestSkin"
   ...       />
   ... </configure>
@@ -72,36 +40,37 @@ Now we will setup a content object in our site:
 
   >>> siteURL = 'http://localhost/++skin++JSONRPCTestSkin'
 
-Now we can call the method from our JSONRPC view:
+Now we can call the method goodResult from our JSONRPC view:
 
   >>> from z3c.jsonrpc import testing
   >>> request = testing.TestRequest()
   >>> demoView = DemoView(content, request)
-  >>> demoView.fail()
+  >>> demoView.goodResult()
+  u'good'
+
+  >>> demoView.badResult()
   Traceback (most recent call last):
   ...
-  Retry: None
+  ConflictError: database conflict error
 
 
-JSON-RPC proxy
---------------
+Raise Retry (handleErrors=False)
+--------------------------------
 
-The jsonrpc package provides also a JSON-RPC proxy implementation. This
-implementation is similar to the one known from xmlrpclib except that it can
-handle JSON instead of XML.
+Now we force to run into Retry error. As you can see the ConflictError is the
+original error of Retry. Note we use handleErrors=False here:
 
-Let's try to call our method called ``hello`` we defined before:
+  >>> from z3c.jsonrpc.testing import JSONRPCTestProxy
+  >>> proxy = JSONRPCTestProxy(siteURL + '/content', handleErrors=False)
+  >>> proxy.badResult()
+  Traceback (most recent call last):
+  ...
+  Retry: database conflict error
+
+
+TODO: fix this missing 599 status
+---------------------------------
 
   >>> from z3c.jsonrpc.testing import JSONRPCTestProxy
   >>> proxy = JSONRPCTestProxy(siteURL + '/content')
-  >>> proxy.fail()
-  u'Hello World'
-
-
-
-cleanup
--------
-
-Now we need to clean up the custom module.
-
-  >>> del sys.modules['custom']
+  >>> proxy.badResult()

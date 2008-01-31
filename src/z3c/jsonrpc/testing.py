@@ -67,6 +67,7 @@ class JSONRPCTestTransport(Transport):
 
         errcode = response.getStatus()
         errmsg = response.getStatusString()
+        
         # This is not the same way that the normal transport deals with the
         # headers.
         headers = response.getHeaders()

@@ -12,13 +12,38 @@
 #
 ##############################################################################
 """
-$Id:$
+$Id$
 """
 __docformat__ = "reStructuredText"
 
+import sys
 import unittest
+import persistent
+import zope.interface
+from zope.publisher.interfaces import Retry
 from zope.testing import doctest
 from z3c.jsonrpc import testing
+from z3c.jsonrpc import publisher
+from ZODB.POSException import ConflictError
+
+
+class IDemoContent(zope.interface.Interface):
+    """Demo content interface."""
+
+
+class DemoContent(persistent.Persistent):
+    """Demo content."""
+    zope.interface.implements(IDemoContent)
+
+
+class DemoView(publisher.MethodPublisher):
+    """Sample JSON view."""
+
+    def goodResult(self):
+        return u'good'
+
+    def badResult(self):
+        raise ConflictError
 
 
 def test_suite():

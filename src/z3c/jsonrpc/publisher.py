@@ -76,6 +76,7 @@ class MethodTraverser(object):
     def publishTraverse(self, request, name):
         return getattr(self.context, name)
 
+
 class JSONInputStream(HTTPInputStream):
     def __init__(self, stream, environment):
         self.stream = stream
@@ -88,6 +89,7 @@ class JSONInputStream(HTTPInputStream):
             self.cacheStream = StringIO()
         else:
             self.cacheStream = TemporaryFile()
+
 
 class JSONRPCRequest(HTTPRequest):
     """JSON-RPC request implementation based on IHTTPRequest."""
