@@ -74,3 +74,9 @@ TODO: fix this missing 599 status
   >>> from z3c.jsonrpc.testing import JSONRPCTestProxy
   >>> proxy = JSONRPCTestProxy(siteURL + '/content')
   >>> proxy.badResult()
+  Traceback (most recent call last):
+  ...
+  ResponseError: Check proxy.error for error message
+
+  >>> proxy.error
+  u'ConflictError: database conflict error'
