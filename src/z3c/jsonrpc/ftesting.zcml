@@ -34,7 +34,6 @@
   <include package="zope.app.twisted" />
   <include package="zope.app.wsgi" />
   <include package="zope.component" />
-  <include package="zope.contentprovider" /> 
   <include package="zope.location" />
   <include package="zope.publisher" />
   <include package="zope.traversing" />

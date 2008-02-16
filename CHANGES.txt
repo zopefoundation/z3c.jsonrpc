@@ -2,6 +2,12 @@
 CHANGES
 =======
 
+0.5.2 (unreleased)
+------------------
+
+- Removed unused dependency to z3c.layer in test setup
+
+
 0.5.1 (2008-01-24)
 ------------------
 

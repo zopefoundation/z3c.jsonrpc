@@ -61,7 +61,6 @@ setup (
     extras_require = dict(
         test = [
             'z3c.coverage',
-            'z3c.layer',
             'zope.app.testing',
             'zope.testbrowser',
             'zope.testing',
