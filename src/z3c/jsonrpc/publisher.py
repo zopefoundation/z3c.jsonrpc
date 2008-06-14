@@ -16,6 +16,7 @@ $Id:$
 """
 __docformat__ = "reStructuredText"
 
+import re
 import traceback
 import logging
 
@@ -33,7 +34,6 @@ from z3c.json.interfaces import IJSONWriter
 from z3c.json.converter import premarshal
 from z3c.jsonrpc import interfaces
 from z3c.jsonrpc.interfaces import JSON_CHARSETS
-from z3c.jsonrpc.interfaces import PYTHON_KW_MARKER
 
 DEBUG = logging.DEBUG
 logger = logging.getLogger()
@@ -106,6 +106,8 @@ class JSONRPCRequest(HTTPRequest):
                 pass
         return text
 
+    _typeFormat = re.compile('([a-zA-Z][a-zA-Z0-9_]+|\\.[xy])$')
+
     def processInputs(self):
         """take the converted request and make useful args of it."""
         json = zope.component.getUtility(IJSONReader)
@@ -130,24 +132,34 @@ class JSONRPCRequest(HTTPRequest):
             # now, look for keyword parameters, the old way
             kwargs = None
             notPositional = []
-            for k in args:
-                if isinstance(k, dict):
-                    if k.has_key(PYTHON_KW_MARKER):
-                        if isinstance(k[PYTHON_KW_MARKER], dict):
-                            j = k[PYTHON_KW_MARKER]
-                            kwargs = j
-                            notPositional.append(k)
-            if notPositional:
-                for k in notPositional:
-                    args.remove(k)
-            if kwargs:
-                for m in kwargs.keys():
-                    self.form[str(m)] = kwargs[m]
+            for arg in args:
+                if isinstance(arg, dict):
+                    # set every dict key value as form items and support at 
+                    # least ``:list`` and ``:tuple`` input field name postifx
+                    # conversion.
+                    for key, d in arg.items():
+                        key = str(key)
+                        pos = key.rfind(":")
+                        if pos > 0:
+                            match = self._typeFormat.match(key, pos + 1)
+                            if match is not None:
+                                key, type_name = key[:pos], key[pos + 1:]
+                                if type_name == 'list':
+                                    d = [d]
+                                if type_name == 'tuple':
+                                    d = tuple(d)
+                        self.form[key] = d
         elif isinstance(params, dict):
+            # json-rpc 1.2
             # Note: the JSONRPCProxy uses allways a dict for params. This means
             # we only use this part for extract the data.
-            # json-rpc 1.1 (to be proposed)
-            # get the numeric params for positional params
+
+            # Get the numeric params for positional params
+            # This was proposed for json-rpc 1.1 but seems not get accepted.
+            # The new 2.0 proposal only defines named paramters if they get
+            # applied as key/value pair.
+            
+            # review and check this implementation after JSON-RPC 2.0 final
             temp_positional = []
             for key in params:
                 if str(key).isdigit():

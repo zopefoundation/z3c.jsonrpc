@@ -58,7 +58,7 @@ jsonrpc_call = TestCall()
 
 class ParamTestCall:
     def __init__(self):
-        self.body = '{"id":"httpReq","method":"keyworded","params":[1,{"pythonKwMaRkEr":{"kw1":"aaa"}}]}'
+        self.body = '{"id":"httpReq","method":"keyworded","params":[{"kw1":"aaa"}]}'
         self.headers = []
 
 

@@ -27,7 +27,6 @@ from zope.app.publication.interfaces import IRequestFactory
 from zope.publisher.interfaces.http import IHTTPRequest
 
 JSON_CHARSETS = ('utf-8','utf-16', 'utf-32')
-PYTHON_KW_MARKER = "pythonKwMaRkEr"
 
 
 class IMethodPublisher(zope.interface.Interface):
