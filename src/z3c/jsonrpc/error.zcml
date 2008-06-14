@@ -1,0 +1,51 @@
+<configure
+    xmlns:zope="http://namespaces.zope.org/zope"
+    xmlns="http://namespaces.zope.org/browser"
+    i18n_domain="zope">
+
+  <!-- implement error views for this exceptions
+       The error views should return a 1i8n aware error message as result
+       which get set in setResult instead of using the built in 
+       handleException form the JSONRPCResponse. 
+       See zope.app.publication.zopepublication.ZopePublication
+  -->
+  <defaultView
+      name="error"
+      for="zope.interface.common.interfaces.IException"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      />
+
+  <defaultView
+      name="error"
+      for="zope.publisher.interfaces.ITraversalException"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      />
+
+  <!-- IUnauthorized -->
+  <page
+      name="error"
+      class=".error.UnauthorizedResponse"
+      for="zope.security.interfaces.IUnauthorized"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+
+  <defaultView
+      name="error"
+      for="zope.security.interfaces.IUnauthorized"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      />
+
+  <defaultView
+      name="error"
+      for="zope.exceptions.interfaces.IUserError"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      />
+
+  <defaultView
+      name="error"
+      for="zope.publisher.interfaces.INotFound"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      />
+
+</configure>

@@ -60,11 +60,6 @@
       />
 
 
-  <!-- error handling -->
-  <defaultView
-      for="zope.interface.common.interfaces.IException"
-      type=".layer.IJSONRPCLayer"
-      name="error"
-      />
+  <include file="error.zcml" />
 
 </configure>

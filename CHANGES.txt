@@ -5,6 +5,8 @@ CHANGES
 0.5.2 (unreleased)
 ------------------
 
+- Make progress with JSON-RPC 2.0 sepcification implementation
+
 - Removed unused dependency to z3c.layer in test setup
 
 
