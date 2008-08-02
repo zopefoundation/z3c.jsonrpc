@@ -20,9 +20,9 @@ import StringIO
 
 import persistent
 import zope.interface
+import zope.testing.cleanup
 from zope.testing import doctest
 from zope.app.testing import functional
-from zope.app.testing.functional import HTTPCaller
 
 from z3c.json.interfaces import IJSONReader
 from z3c.json.converter import JSONReader
@@ -206,19 +206,15 @@ class HTTPCaller(functional.HTTPCaller):
 # Doctest setup
 #
 ###############################################################################
-
-def FunctionalDocFileSuite(*paths, **kw):
+def _prepare_doctest_keywords(kw):
     globs = kw.setdefault('globs', {})
     globs['http'] = HTTPCaller()
     globs['getRootFolder'] = functional.getRootFolder
     globs['sync'] = functional.sync
 
-    kw['package'] = doctest._normalize_module(kw.get('package'))
-
     kwsetUp = kw.get('setUp')
     def setUp(test):
         functional.FunctionalTestSetup().setUp()
-
         if kwsetUp is not None:
             kwsetUp(test)
     kw['setUp'] = setUp
@@ -231,11 +227,19 @@ def FunctionalDocFileSuite(*paths, **kw):
     kw['tearDown'] = tearDown
 
     if 'optionflags' not in kw:
-        kw['optionflags'] = (doctest.ELLIPSIS
+        old = doctest.set_unittest_reportflags(0)
+        doctest.set_unittest_reportflags(old)
+        kw['optionflags'] = (old
+                             | doctest.ELLIPSIS
                              | doctest.REPORT_NDIFF
                              | doctest.NORMALIZE_WHITESPACE)
 
-    suite = functional.FunctionalDocFileSuite(*paths, **kw)
+
+def FunctionalDocFileSuite(*paths, **kw):
+    # use our custom HTTPCaller and layer
+    kw['package'] = doctest._normalize_module(kw.get('package'))
+    _prepare_doctest_keywords(kw)
+    suite = doctest.DocFileSuite(*paths, **kw)
     suite.layer = JSONRPCTestingLayer
     return suite
 
@@ -290,11 +294,11 @@ def tearDownTestAsModule(test):
 #
 ###############################################################################
 
-
-
 def setUp(test):
     setUpTestAsModule(test, name='README')
 
 
 def tearDown(test):
+    # ensure that we cleanup everything
+    zope.testing.cleanup.cleanUp()
     tearDownTestAsModule(test)

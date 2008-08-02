@@ -95,9 +95,16 @@ And define a JSONRPC method view:
   ...     def greeting(self, name):
   ...         return u"Hello %s" % name
   ...
-  ...     def kwarguments(self, prefix, foo=None, bar=None):
+  ...     def mixedparams(self, prefix, bar=None, foo=None):
   ...         # Note; keyword arguments can be found in request.form
-  ...         return u"%s %s %s" % (prefix, foo, bar)
+  ...         return u"%s %s %s" % (prefix, bar, foo)
+  ...
+  ...     def kws(self, adam=None, foo=None, bar=None):
+  ...         # Note; keyword arguments can be found in request.form
+  ...         a = self.request.get('adam')
+  ...         b = self.request.form.get('foo')
+  ...         c = self.request.form.get('bar')
+  ...         return u"%s %s %s" % (a, b, c)
   ...
   ...     def showId(self):
   ...         return u"The json id is: %s" % self.request.jsonId
@@ -130,9 +137,16 @@ And define a JSONRPC method view:
   ...     def greeting(self, name):
   ...         return u"Hello %s" % name
   ...
-  ...     def kwarguments(self, prefix, foo=None, bar=None):
+  ...     def mixedparams(self, prefix, foo=None, bar=None):
   ...         # Note; keyword arguments can be found in request.form
   ...         return u"%s %s %s" % (prefix, foo, bar)
+  ...
+  ...     def kws(self, adam=None, foo=None, bar=None):
+  ...         # Note; keyword arguments can be found in request.form
+  ...         a = self.request.get('adam')
+  ...         b = self.request.form.get('foo')
+  ...         c = self.request.form.get('bar')
+  ...         return u"%s %s %s" % (a, b, c)
   ...
   ...     def showId(self):
   ...         return u"The json id is: %s" % self.request.jsonId
@@ -164,7 +178,7 @@ Let's show how we can register a jsonrpc view:
   ...       for="custom.IDemoContent"
   ...       class="custom.DemoView"
   ...       permission="zope.Public"
-  ...       methods="hello greeting kwarguments showId forceValueError"
+  ...       methods="hello greeting mixedparams kws showId forceValueError"
   ...       layer="z3c.jsonrpc.testing.IJSONRPCTestSkin"
   ...       />
   ... </configure>
@@ -188,7 +202,7 @@ Let's show how we can register a jsonrpc view for the container:
   ...       for="custom.IDemoContainer"
   ...       class="custom.DemoContainerView"
   ...       permission="zope.Public"
-  ...       methods="available greeting kwarguments showId forceValueError"
+  ...       methods="available greeting mixedparams kws showId forceValueError"
   ...       layer="z3c.jsonrpc.testing.IJSONRPCTestSkin"
   ...       />
   ... </configure>
@@ -267,13 +281,20 @@ Now let's make a remote procedure call with a argument:
   >>> proxy.greeting(u'Jessy')
   u'Hello Jessy'
 
-Now let's make a remote procedure call with a kw arguments. Note that this
-key word arguments are stored in the request.form. But this doesn't change
-anything because this varaibles are also accessible like form variables e.g.
-self.request['foo'].Also note that we don't support the **kw signature:
+Note that this key word arguments are stored in the request.form. Important
+to know is that JSON-RPC does not support positional and named arguments in
+one method call. We are working on a solution for solve that restriction which
+hurts us as python developer.
 
-  >>> proxy.kwarguments('Hello', foo=u'FOO', bar=u'BAR')
-  u'Hello FOO BAR'
+  >>> proxy.mixedparams('Hello', foo=u'FOO', bar=u'BAR')
+  Traceback (most recent call last):
+  ...
+  ValueError: Mixing positional and named parameters in one call is not possible
+
+Let's call named arguments:
+
+  >>> proxy.kws(bar=u'BAR', foo=u'FOO')
+  u'None FOO BAR'
 
 There is also an ``id`` in the json response. Let's use such a json request id
 in our JSONRPCProxy:
@@ -297,7 +318,7 @@ See what happens if the server raises an Exception:
 and the error message is:
 
   >>> proxy.error
-  u'ValueError: Something was wrong in server method.'
+  {u'message': u'Invalid JSON-RPC', u'code': -32603, u'data': u'ValueError: Something was wrong in server method.'}
 
 The error property gets reset on the next successfull call:
 

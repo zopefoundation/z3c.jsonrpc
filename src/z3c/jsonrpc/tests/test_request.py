@@ -32,11 +32,6 @@ class Publication(DefaultPublication):
 
     require_docstrings = 0
 
-    def getDefaultTraversal(self, request, ob):
-        if hasattr(ob, 'browserDefault'):
-            return ob.browserDefault(request)
-        return ob, ()
-
 
 class TestJSONRPCRequest(JSONRPCRequest, HTTPCharsets):
     """Make sure that our request also implements IHTTPCharsets, so that we do
@@ -47,30 +42,15 @@ class TestJSONRPCRequest(JSONRPCRequest, HTTPCharsets):
         JSONRPCRequest.__init__(self, *args, **kw)
 
 
-class TestCall:
+class PositionalTestCall:
     def __init__(self):
-        self.body = '{"id":"httpReq","method":"action","params":[1]}'
+        self.body = '{"jsonrpc":"2.0","id":"httpReq","method":"positional","params":["aaa","bbb"]}'
         self.headers = []
 
 
-jsonrpc_call = TestCall()
-
-
-class ParamTestCall:
+class NamedTestCall:
     def __init__(self):
-        self.body = '{"id":"httpReq","method":"keyworded","params":[{"kw1":"aaa"}]}'
-        self.headers = []
-
-
-class Param1_1SpecTestCall1:
-    def __init__(self):
-        self.body = '{"id":"httpReq","method":"keyworded","params":{"1":1,"kw1":"aaa"}}'
-        self.headers = []
-
-
-class Param1_1SpecTestCall2:
-    def __init__(self):
-        self.body = '{"id":"httpReq","method":"action1_1","params":{"1":1,"kw1":"aaa"}}'
+        self.body = '{"jsonrpc":"2.0","id":"httpReq","method":"named","params":{"kw1":"aaa","kw2":"bbb"}}'
         self.headers = []
 
 
@@ -104,27 +84,35 @@ class JSONRPCTests(unittest.TestCase):
         class Item(object):
 
             def __call__(self, a, b):
-                return "%s, %s" % (`a`, `b`)
+                return "%s, %s" % (a, b)
 
             def doit(self, a, b):
                 return 'do something %s %s' % (a, b)
 
         class View(object):
 
-            def action(self, a, kw1=None):
-                return "Parameter[type: %s; value: %s" %(
-                    type(a).__name__, `a`)
+            def __init__(self, context, request):
+                self.context = context
+                self.request = request
 
-            def keyworded(self, a, kw1="spam"):
-                return "kw1: [type: %s; value: %s]" %(
-                    type(kw1).__name__, `kw1`)
+            def positional(self, a, b):
+                return "Parameter: a; type: %s; value: %s" %(
+                    type(a).__name__, a)
 
-            def action1_1(self, a, kw1=None):
-                return "Parameter[type: %s; value: %s" %(
-                    type(a).__name__, `a`)
+            def named(self, kw1=None, kw2=None):
+                kw1 = self.request.get('kw1', kw1)
+                kw2 = self.request.get('kw2', kw2)
+                return "Keyword: kw1; type: %s; value: %s] " \
+                       "Keyword: kw2; type: %s; value: %s]" %(
+                    type(kw1).__name__, kw1, type(kw2).__name__, kw2)
 
         class Item2(object):
-            view = View()
+
+            request = None
+
+            @property
+            def view(self):
+                return View(self, self.request)
 
         self.app = AppRoot()
         self.app.folder = Folder()
@@ -137,7 +125,6 @@ class JSONRPCTests(unittest.TestCase):
         env.update(extra_env)
         if len(body.body):
             env['CONTENT_LENGTH'] = str(len(body.body))
-
         publication = Publication(self.app)
         instream = StringIO(body.body)
         request = TestJSONRPCRequest(instream, env)
@@ -146,42 +133,31 @@ class JSONRPCTests(unittest.TestCase):
 
 
     def testProcessInput(self):
-        req = self._createRequest({}, jsonrpc_call)
+        req = self._createRequest({}, PositionalTestCall())
+        self.app.folder.item2.request = req
         req.processInputs()
-        self.failUnlessEqual(req._args, (1,))
-        self.failUnlessEqual(tuple(req._path_suffix), ('action',))
+        self.failUnlessEqual(req._args, (u'aaa', u'bbb'))
+        self.failUnlessEqual(tuple(req._path_suffix), ('positional',))
 
-
-    def testTraversal(self):
-        req = self._createRequest({}, jsonrpc_call)
+    def testPositional(self):
+        req = self._createRequest({}, PositionalTestCall())
+        self.app.folder.item2.request = req
         req.processInputs()
         action = req.traverse(self.app)
         self.failUnlessEqual(action(*req._args),
-                             "Parameter[type: int; value: 1")
+                             'Parameter: a; type: unicode; value: aaa')
 
     def testKeyword(self):
-        req = self._createRequest({}, ParamTestCall())
+        req = self._createRequest({}, NamedTestCall())
+        self.app.folder.item2.request = req
         req.processInputs()
         action = req.traverse(self.app)
         self.failUnlessEqual(action(*req._args, **req.form),
-                             "kw1: [type: unicode; value: u'aaa']")
-
-    def test1_1spec_kw(self):
-        req = self._createRequest({}, Param1_1SpecTestCall1())
-        req.processInputs()
-        action = req.traverse(self.app)
-        self.failUnlessEqual(action(*req._args, **req.form),
-                             "kw1: [type: unicode; value: u'aaa']")
-
-    def test1_1spec2_p(self):
-        req = self._createRequest({}, Param1_1SpecTestCall2())
-        req.processInputs()
-        action = req.traverse(self.app)
-        self.failUnlessEqual(action(*req._args, **req.form),
-                             "Parameter[type: int; value: 1")
+            u'Keyword: kw1; type: unicode; value: aaa] Keyword: kw2; type: unicode; value: bbb]')
 
     def testJSONRPCMode(self):
-        req = self._createRequest({}, jsonrpc_call)
+        req = self._createRequest({}, PositionalTestCall())
+        self.app.folder.item2.request = req
         req.processInputs()
         self.failUnlessEqual(req['JSONRPC_MODE'],True)
 

@@ -18,7 +18,6 @@ __docformat__ = "reStructuredText"
 
 import zope.interface
 import zope.component
-
 from zope.app.publication.http import BaseHTTPPublication
 from zope.app.publication.interfaces import IRequestPublicationFactory
 
@@ -30,7 +29,6 @@ class JSONRPCPublication(BaseHTTPPublication):
     """JSON RPC Publication."""
 
     zope.interface.implements(interfaces.IJSONRPCPublication)
-
 
 
 class JSONRPCFactory(object):

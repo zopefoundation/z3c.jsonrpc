@@ -35,6 +35,8 @@ from z3c.json.converter import premarshal
 from z3c.jsonrpc import interfaces
 from z3c.jsonrpc.interfaces import JSON_CHARSETS
 
+JSON_RPC_VERSION = '2.0'
+
 DEBUG = logging.DEBUG
 logger = logging.getLogger()
 
@@ -75,9 +77,33 @@ class MethodTraverser(object):
 
 
 class JSONRPCRequest(HTTPRequest):
-    """JSON-RPC request implementation based on IHTTPRequest."""
+    """JSON-RPC request implementation based on IHTTPRequest.
+    
+    This implementation supports the following JSON-RPC Specification versions:
+    
+    - 1.0
+    - 1.1
+    - 2.0
+    
+    Version 1.0 and 1.1 offers params as a list. This params get converted to
+    positional arguments if calling the JSON-RPC function.
+    
+    The version 2.0 offers support for named key/value params. The important 
+    thing to know is that this implementation will convert named params kwargs 
+    to form paramters. This means the method doesn't get any key word argument. 
+    The reason why I was choosing is the existing publisher implementation and 
+    it's debugger integration. If someone likes to integrate **kwargs support, 
+    take a look at the publisher.publish method and it's mapply function which 
+    get wrapped by the Debugger class. I hope that's fine for now and I 
+    recommend to avoid kwargs for JSON-RPC methods ;-)
+
+    The z3c.jsonrpcclient JavaScript method JSONRPCProxy converts a 
+    typeof object as arguments[0] to named key/value pair arguments.
+
+    """
 
     _jsonId = 'jsonrpc'
+    jsonVersion = JSON_RPC_VERSION
     jsonId = None
 
     zope.interface.implements(interfaces.IJSONRPCRequest,
@@ -121,17 +147,27 @@ class JSONRPCRequest(HTTPRequest):
         # ensure unicode
         if not isinstance(input, unicode):
             input = self._decode(input)
-        data = json.read(input)
+        try:
+            data = json.read(input)
+        except:
+            # catch any error since we don't know which library is used as 
+            # parser
+            raise ParseError
+        # get the params
+        params = data['params']
         if self.jsonId is None:
             self.jsonId = data.get('id', self._jsonId)
-        params = data['params']
 
-        if isinstance(params, list):
-            # json-rpc 1.0
+        # get the json version. The version 1.0 offers no version argument.
+        # The version 1.1 offers a version key and since version 2.0 the 
+        # version is given with the ``jsonrpc`` key. Let's try to find the 
+        # version for our request.
+        self.jsonVersion = data.get('version', self.jsonVersion)
+        self.jsonVersion = data.get('jsonrpc', self.jsonVersion)
+        if self.jsonVersion in ['1.0', '1.1']:
+            # json-rpc 1.0 and 1.1
             args = params
-            # now, look for keyword parameters, the old way
-            kwargs = None
-            notPositional = []
+            # version 1.0 and 1.1 uses a list of arguments
             for arg in args:
                 if isinstance(arg, dict):
                     # set every dict key value as form items and support at 
@@ -144,39 +180,75 @@ class JSONRPCRequest(HTTPRequest):
                             match = self._typeFormat.match(key, pos + 1)
                             if match is not None:
                                 key, type_name = key[:pos], key[pos + 1:]
-                                if type_name == 'list':
+                                if type_name == 'list' and not isinstance(d, list):
                                     d = [d]
-                                if type_name == 'tuple':
+                                if type_name == 'tuple' and not isinstance(d, tuple):
                                     d = tuple(d)
                         self.form[key] = d
-        elif isinstance(params, dict):
-            # json-rpc 1.2
-            # Note: the JSONRPCProxy uses allways a dict for params. This means
-            # we only use this part for extract the data.
-
-            # Get the numeric params for positional params
-            # This was proposed for json-rpc 1.1 but seems not get accepted.
-            # The new 2.0 proposal only defines named paramters if they get
-            # applied as key/value pair.
             
-            # review and check this implementation after JSON-RPC 2.0 final
-            temp_positional = []
-            for key in params:
-                if str(key).isdigit():
-                    temp_positional.append((key, params[key]))
-            temp_positional.sort(key=intsort)
-            args = []
-            # make args from positional args and remove them from params
-            for item in temp_positional:
-                args.append(item[1])
-                del params[item[0]]
-            # drop remaining named params into request.form
-            for named_param in params:
-                # named_param is unicode; python needs string for param names
-                self.form[str(named_param)] = params[named_param]
+        elif self.jsonVersion == '2.0':
+            # version 2.0 uses a list or a dict as params. Process the list
+            # params here. This params get used as positional arguments in the
+            # method call.
+            if isinstance(params, list):
+                args = params
+                # now, look for keyword parameters, the old way
+                for arg in args:
+                    if isinstance(arg, dict):
+                        # set every dict key value as form items and support at 
+                        # least ``:list`` and ``:tuple`` input field name postifx
+                        # conversion.
+                        for key, d in arg.items():
+                            key = str(key)
+                            pos = key.rfind(":")
+                            if pos > 0:
+                                match = self._typeFormat.match(key, pos + 1)
+                                if match is not None:
+                                    key, type_name = key[:pos], key[pos + 1:]
+                                    if type_name == 'list' and not isinstance(d, list):
+                                        d = [d]
+                                    if type_name == 'tuple' and not isinstance(d, tuple):
+                                        d = tuple(d)
+                            self.form[key] = d
+
+            elif isinstance(params, dict):
+                # process the key/value pair params. This arguments get stored
+                # in the request.form argument and we skip it from method calls.
+                # This means this library will not support key word arguments
+                # for method calls. It will instead store them in the form.
+                # This has two reasons.
+                # 1. Zope doesn't support kwargs in the publication 
+                #    implementation. It only supports positional arguments
+                # 2. The JSON-RPC specification doesn't allow to use positional
+                #     and keyword arguments on one method call
+                # 3. Python doesn't allow to convert kwargs to positional 
+                #    arguments because a dict doesn't provide an order
+                # This means you should avoid to call a method with kwargs.
+                # just use positional arguments if possible. Or get them from
+                # directly from the request or request.form argument in your
+                # code. Let me know if this is a real problem for you and you
+                # like to implement a different kwarg handling. We have some 
+                # ideas for add support for this.
+                args = params
+                # set every dict key value as form items and support at 
+                # least ``:list`` and ``:tuple`` input field name postifx
+                # conversion.
+                for key, d in args.items():
+                    key = str(key)
+                    pos = key.rfind(":")
+                    if pos > 0:
+                        match = self._typeFormat.match(key, pos + 1)
+                        if match is not None:
+                            key, type_name = key[:pos], key[pos + 1:]
+                            if type_name == 'list' and not isinstance(d, list):
+                                d = [d]
+                            if type_name == 'tuple' and not isinstance(d, tuple):
+                                d = tuple(d)
+                    self.form[key] = d
+                args = []
         else:
-            raise TypeError, 'Unsupported type for JSON-RPC "params" (%s)' \
-                % type(params)
+            raise TypeError, 'Unsupported JSON-RPC version (%s)' % \
+                self.jsonVersion
         self._args = tuple(args)
         # make environment, cookies, etc., available to request.get()
         super(JSONRPCRequest,self).processInputs()
@@ -208,7 +280,7 @@ class JSONRPCRequest(HTTPRequest):
             return result
         return super(JSONRPCRequest, self).get(key, default)
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         return self.get(key)
 
 
@@ -219,26 +291,38 @@ class JSONRPCResponse(HTTPResponse):
     def setResult(self, result):
         """The result dict contains the following key value pairs
 
+        The version 1.0 and 1.1 provides a response dict with the following 
+        arguments:
+
         id -- json request id
         result -- result or null on error
         error -- error or null if result is Ok
 
+        The version 2.0 provides a response dict with the following named 
+        paramters:
+
+        jsonrpc -- jsonrpc version 2.0 or higher in future versions
+        id -- json request id
+        result -- result if no error is raised
+        error -- error if any given
+
         """
-        id = self._request.jsonId
-        if id is not None:
-            result = premarshal(result)
-            wrapper = {'id': id}
-            wrapper['result'] = result
-            wrapper['error'] = None
-            json = zope.component.getUtility(IJSONWriter)
-            encoding = getCharsetUsingRequest(self._request)
-            result = json.write(wrapper)
-            body = self._prepareResult(result)
-            super(JSONRPCResponse,self).setResult(body)
-            logger.log(DEBUG, "%s" % result)
+        jsonId = self._request.jsonId
+        jsonVersion = self._request.jsonVersion
+        result = premarshal(result)
+        if jsonVersion == 1.0:
+            wrapper = {'result': result, 'error': None, 'id': jsonId}
+        elif jsonVersion == 1.1:
+            wrapper = {'version': jsonVersion, 'result': result, 'error': None,
+                       'id': jsonId}
         else:
-            self.setStatus(204)
-            super(JSONRPCResponse,self).setResult('')
+            wrapper = {'jsonrpc': jsonVersion, 'result': result, 'id': jsonId}
+        json = zope.component.getUtility(IJSONWriter)
+        encoding = getCharsetUsingRequest(self._request)
+        result = json.write(wrapper)
+        body = self._prepareResult(result)
+        super(JSONRPCResponse,self).setResult(body)
+        logger.log(DEBUG, "%s" % result)
 
     def _prepareResult(self, result):
         # we've asked json to return unicode; result should be unicode
@@ -269,9 +353,25 @@ class JSONRPCResponse(HTTPResponse):
             exc_data.append( "** %s: %s" % exc_info[:2])
         logger.log(logging.ERROR, "\n".join(exc_data))
         s = '%s: %s' % (getattr(t, '__name__', t), value)
-        wrapper = {'id': self._request.jsonId}
-        wrapper['result'] = None
-        wrapper['error'] = s
+        if self._request.jsonVersion == 1.0:
+            wrapper = {'result': None,
+                       'error': s,
+                       'id': self._request.jsonId,}
+        elif self._request.jsonVersion == 1.1:
+            wrapper = {'version': self._request.jsonVersion,
+                       'result': None,
+                       'error': s,
+                       'id': self._request.jsonId,}
+        else:
+            # TODO: implement better error handling, use the right error codes.
+            # see:
+            # http://groups.google.com/group/json-rpc/web/json-rpc-1-2-proposal#error-object
+            wrapper = {'jsonrpc': self._request.jsonVersion,
+                       'error': {'code': -32603,
+                                 'message': 'Invalid JSON-RPC',
+                                 'data': s},
+                       'id': self._request.jsonId}
+
         json = zope.component.getUtility(IJSONWriter)
         result = json.write(wrapper)
         body = self._prepareResult(result)
