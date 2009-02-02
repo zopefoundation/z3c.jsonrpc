@@ -247,7 +247,7 @@ falls back to the browser request factory:
   >>> browser.open(siteURL + '/content/hello')
   Traceback (most recent call last):
   ...
-  NotFound: Object: <zope.app.folder.folder.Folder...: u'++skin++JSONRPCTestSkin'
+  NotFound: Object: <zope.site.folder.Folder...: u'++skin++JSONRPCTestSkin'
 
 
 Testing
@@ -274,7 +274,6 @@ Let's try to call our method called ``hello`` we defined before:
   >>> p2 = JSONRPCTestProxy(siteURL + '/container')
   >>> p2.available()
   u'Hello World'
-
 
 Now let's make a remote procedure call with a argument:
 

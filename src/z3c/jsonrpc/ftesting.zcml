@@ -6,38 +6,25 @@
 
   <include package="zope.i18n" file="meta.zcml" />
   <include package="zope.app.component" file="meta.zcml" />
-  <include package="zope.app.component.browser" file="meta.zcml" />
-  <include package="zope.app.container.browser" file="meta.zcml" /> 
-  <include package="zope.app.form.browser" file="meta.zcml" /> 
-  <include package="zope.app.pagetemplate" file="meta.zcml" />
   <include package="zope.app.publication" file="meta.zcml" />
   <include package="zope.app.publisher" file="meta.zcml" />
   <include package="zope.app.security" file="meta.zcml" />
   <include package="zope.securitypolicy" file="meta.zcml" />
 
-  <!-- uhh, remove this later -->
-  <browser:menu id="zmi_views" title="Views" />
-  <browser:menu id="zmi_actions" title="Actions" />
-
   <include package="zope.annotation" />
-  <include package="zope.app.appsetup" /> 
-  <include package="zope.app.component" /> 
-  <include package="zope.app.container" /> 
-  <include package="zope.app.error" />
-  <include package="zope.app.folder" /> 
-  <include package="zope.app.i18n" /> 
-  <include package="zope.app.publication" />
-  <include package="zope.app.publisher.browser" />
-  <include package="zope.app.publisher" />
-  <include package="zope.app.security" />
-  <include package="zope.app.session" /> 
-  <include package="zope.app.twisted" />
-  <include package="zope.app.wsgi" />
   <include package="zope.component" />
+  <include package="zope.error" />
   <include package="zope.location" />
   <include package="zope.publisher" />
   <include package="zope.traversing" />
-  <include package="zope.traversing.browser" />
+  <include package="zope.app.appsetup" />
+  <include package="zope.app.component" />
+  <include package="zope.app.container" />
+  <include package="zope.app.publication" />
+  <include package="zope.app.publisher" />
+  <include package="zope.app.security" />
+  <include package="zope.app.twisted" />
+  <include package="zope.app.wsgi" />
 
   <securityPolicy
       component="zope.securitypolicy.zopepolicy.ZopeSecurityPolicy"

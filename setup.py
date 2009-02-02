@@ -68,11 +68,10 @@ setup (
         ),
     install_requires = [
         'setuptools',
+        'z3c.i18n',
         'z3c.json',
-        'zope.app.component',
         'zope.app.publication',
         'zope.app.twisted',
-        'zope.app.wsgi',
         'zope.component',
         'zope.configuration',
         'zope.i18n',

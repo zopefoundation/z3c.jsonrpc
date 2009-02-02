@@ -21,7 +21,6 @@ from zope.interface.interfaces import IInterface
 from zope.publisher.interfaces import IPublishTraverse
 from zope.publisher.interfaces.http import IHTTPApplicationRequest
 from zope.publisher.interfaces.http import IHTTPCredentials
-#from zope.publisher.interfaces.xmlrpc import IXMLRPCPublication
 from zope.publisher.interfaces import IPublication
 from zope.app.publication.interfaces import IRequestFactory
 from zope.publisher.interfaces.http import IHTTPRequest

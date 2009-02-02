@@ -15,7 +15,6 @@
 $Id:$
 """
 
-from zope.publisher.interfaces import browser
 from z3c.jsonrpc import interfaces
 
 

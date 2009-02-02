@@ -15,10 +15,9 @@
 $Id:$
 """
 
-import zope.component
 import zope.i18n
-from zope.publisher.interfaces import NotFound
-from z3c.jsonrpc.interfaces import IMethodPublisher
+
+from z3c.i18n import MessageFactory as _
 
 
 class UnauthorizedResponse(object):

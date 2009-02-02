@@ -27,7 +27,7 @@ from zope.security.checker import CheckerPublic, Checker
 from zope.configuration.exceptions import ConfigurationError
 
 from zope.component.interface import provideInterface
-from zope.app.component.metaconfigure import handler
+from zope.component.zcml import handler
 
 from z3c.jsonrpc import interfaces
 from z3c.jsonrpc.publisher import MethodPublisher
