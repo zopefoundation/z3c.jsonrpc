@@ -16,6 +16,7 @@ Version 0.5.2dev (unreleased)
 
 - Removed unused dependency to z3c.layer in test setup
 
+- Removed unused dependency on z3c.i18n.
 
 Version 0.5.1 (2008-01-24)
 --------------------------

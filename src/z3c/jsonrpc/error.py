@@ -16,8 +16,9 @@ $Id:$
 """
 
 import zope.i18n
+import zope.i18nmessageid
 
-from z3c.i18n import MessageFactory as _
+_ = zope.i18nmessageid.MessageFactory('z3c')
 
 
 class UnauthorizedResponse(object):
