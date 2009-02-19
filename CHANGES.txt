@@ -5,6 +5,9 @@ CHANGES
 Version 0.5.2dev (unreleased)
 -----------------------------
 
+- removed develop path for z3c.json from buildout.cfg
+- publisher checks for version id as a string not a float
+
 - Implemented JSON-RPC 2.0 specification. Use JSON-RPC 2.0 version as default.
   Optional the version 1.0 and 1.1 can be set. See JSON-RPC 2.0 specification
   for more information.
@@ -12,7 +15,7 @@ Version 0.5.2dev (unreleased)
 - Added initial version of JSON-RPC exceptions.
 
 - Added explicit test cleanup since some zope testing change left over a global 
-  adapter registry from old conections
+  adapter registry from old connections
 
 - Removed unused dependency to z3c.layer in test setup
 

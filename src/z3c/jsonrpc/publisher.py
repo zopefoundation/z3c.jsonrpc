@@ -310,9 +310,9 @@ class JSONRPCResponse(HTTPResponse):
         jsonId = self._request.jsonId
         jsonVersion = self._request.jsonVersion
         result = premarshal(result)
-        if jsonVersion == 1.0:
+        if jsonVersion == "1.0":
             wrapper = {'result': result, 'error': None, 'id': jsonId}
-        elif jsonVersion == 1.1:
+        elif jsonVersion == "1.1":
             wrapper = {'version': jsonVersion, 'result': result, 'error': None,
                        'id': jsonId}
         else:
