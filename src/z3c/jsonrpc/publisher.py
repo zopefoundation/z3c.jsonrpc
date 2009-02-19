@@ -353,11 +353,11 @@ class JSONRPCResponse(HTTPResponse):
             exc_data.append( "** %s: %s" % exc_info[:2])
         logger.log(logging.ERROR, "\n".join(exc_data))
         s = '%s: %s' % (getattr(t, '__name__', t), value)
-        if self._request.jsonVersion == 1.0:
+        if self._request.jsonVersion == "1.0":
             wrapper = {'result': None,
                        'error': s,
                        'id': self._request.jsonId,}
-        elif self._request.jsonVersion == 1.1:
+        elif self._request.jsonVersion == "1.1":
             wrapper = {'version': self._request.jsonVersion,
                        'result': None,
                        'error': s,
