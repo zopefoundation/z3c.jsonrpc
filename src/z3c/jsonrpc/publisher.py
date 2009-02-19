@@ -313,8 +313,7 @@ class JSONRPCResponse(HTTPResponse):
         if jsonVersion == "1.0":
             wrapper = {'result': result, 'error': None, 'id': jsonId}
         elif jsonVersion == "1.1":
-            wrapper = {'version': jsonVersion, 'result': result, 'error': None,
-                       'id': jsonId}
+            wrapper = {'version': jsonVersion, 'result': result, 'id': jsonId}
         else:
             wrapper = {'jsonrpc': jsonVersion, 'result': result, 'id': jsonId}
         json = zope.component.getUtility(IJSONWriter)
@@ -359,7 +358,6 @@ class JSONRPCResponse(HTTPResponse):
                        'id': self._request.jsonId,}
         elif self._request.jsonVersion == "1.1":
             wrapper = {'version': self._request.jsonVersion,
-                       'result': None,
                        'error': s,
                        'id': self._request.jsonId,}
         else:
