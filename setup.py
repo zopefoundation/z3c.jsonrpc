@@ -25,7 +25,7 @@ def read(*rnames):
 
 setup (
     name='z3c.jsonrpc',
-    version='0.5.2dev',
+    version='0.5.2b3',
     author = "Roger Ineichen and the Zope Community",
     author_email = "zope-dev@zope.org",
     description = "JSON RPC server and client implementation for Zope3",
