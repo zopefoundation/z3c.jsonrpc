@@ -164,35 +164,11 @@ class JSONRPCRequest(HTTPRequest):
         # version for our request.
         self.jsonVersion = data.get('version', self.jsonVersion)
         self.jsonVersion = data.get('jsonrpc', self.jsonVersion)
-        if self.jsonVersion in ['1.0', '1.1']:
+        if self.jsonVersion in ['1.0', '1.1', '2.0']:
             # json-rpc 1.0 and 1.1
-            args = params
-            # version 1.0 and 1.1 uses a list of arguments
-            for arg in args:
-                if isinstance(arg, dict):
-                    # set every dict key value as form items and support at 
-                    # least ``:list`` and ``:tuple`` input field name postifx
-                    # conversion.
-                    for key, d in arg.items():
-                        key = str(key)
-                        pos = key.rfind(":")
-                        if pos > 0:
-                            match = self._typeFormat.match(key, pos + 1)
-                            if match is not None:
-                                key, type_name = key[:pos], key[pos + 1:]
-                                if type_name == 'list' and not isinstance(d, list):
-                                    d = [d]
-                                if type_name == 'tuple' and not isinstance(d, tuple):
-                                    d = tuple(d)
-                        self.form[key] = d
-            
-        elif self.jsonVersion == '2.0':
-            # version 2.0 uses a list or a dict as params. Process the list
-            # params here. This params get used as positional arguments in the
-            # method call.
             if isinstance(params, list):
                 args = params
-                # now, look for keyword parameters, the old way
+                # version 1.0 and 1.1 uses a list of arguments
                 for arg in args:
                     if isinstance(arg, dict):
                         # set every dict key value as form items and support at 
@@ -210,7 +186,6 @@ class JSONRPCRequest(HTTPRequest):
                                     if type_name == 'tuple' and not isinstance(d, tuple):
                                         d = tuple(d)
                             self.form[key] = d
-
             elif isinstance(params, dict):
                 # process the key/value pair params. This arguments get stored
                 # in the request.form argument and we skip it from method calls.

@@ -5,6 +5,10 @@ CHANGES
 Version 0.5.2dev (unreleased)
 -----------------------------
 
+ - support non positional arguments for all jsonrpc versions
+   There is now no distinction in handling method parameters for all supported
+   versions.
+
 - for jsonrpc version 1.1 :
    - must not provide "error" property in case of success
    - must not provide "result" property in case of error
