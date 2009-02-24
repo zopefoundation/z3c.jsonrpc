@@ -20,8 +20,7 @@ import xml.sax.saxutils
 from setuptools import setup, find_packages
 
 def read(*rnames):
-    text = open(os.path.join(os.path.dirname(__file__), *rnames)).read()
-    return xml.sax.saxutils.escape(text)
+    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup (
     name='z3c.jsonrpc',
