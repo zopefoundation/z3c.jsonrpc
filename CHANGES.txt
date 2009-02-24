@@ -2,28 +2,32 @@
 CHANGES
 =======
 
-Version 0.5.2dev (unreleased)
------------------------------
+Version 0.5.2 (2009-02-24)
+--------------------------
 
- - support non positional arguments for all jsonrpc versions
-   There is now no distinction in handling method parameters for all supported
-   versions.
+- added tests for all JSON-RPC versions
 
-- for jsonrpc version 1.1 :
+- Feature: implemented defaultJSONRPCSkin directive
+
+- Feature: support non positional arguments for all jsonrpc versions. There is
+  now no distinction in handling method parameters for all supported versions.
+
+- Fix: for jsonrpc version 1.1 :
    - must not provide "error" property in case of success
    - must not provide "result" property in case of error
 
-- removed develop path for z3c.json from buildout.cfg
-- publisher checks for version id as a string not a float
+- Fix: removed develop path for z3c.json from buildout.cfg
 
-- Implemented JSON-RPC 2.0 specification. Use JSON-RPC 2.0 version as default.
-  Optional the version 1.0 and 1.1 can be set. See JSON-RPC 2.0 specification
-  for more information.
+- Fix: publisher checks for version id as a string not a float
 
-- Added initial version of JSON-RPC exceptions.
+- Feature: Implemented JSON-RPC 2.0 specification. Use JSON-RPC 2.0 version as
+  default. Optional the version 1.0 and 1.1 can be set. See JSON-RPC 2.0
+  specification for more information.
 
-- Added explicit test cleanup since some zope testing change left over a global 
-  adapter registry from old connections
+- Feature: Added initial version of JSON-RPC exceptions.
+
+- Added explicit test cleanup since some zope testing change left over a
+  global adapter registry from old connections
 
 - Removed unused dependency to z3c.layer in test setup
 

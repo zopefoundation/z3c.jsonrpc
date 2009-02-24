@@ -1,8 +1,9 @@
-<configure xmlns="http://namespaces.zope.org/zope"
-           xmlns:meta="http://namespaces.zope.org/meta"
-           xmlns:browser="http://namespaces.zope.org/browser"
-           xmlns:z3c="http://namespaces.zope.org/z3c"
-           i18n_domain="zope">
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    i18n_domain="zope">
 
   <include package="zope.i18n" file="meta.zcml" />
   <include package="zope.app.component" file="meta.zcml" />

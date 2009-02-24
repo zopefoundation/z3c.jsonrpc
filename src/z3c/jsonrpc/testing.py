@@ -30,9 +30,10 @@ from z3c.json.exceptions import ProtocolError
 from z3c.json.proxy import JSONRPCProxy
 from z3c.json.transport import Transport
 from z3c.jsonrpc import layer
+from z3c.jsonrpc.publication import JSONRPCPublication
 from z3c.jsonrpc.publisher import JSONRPCRequest
 from z3c.jsonrpc.publisher import MethodPublisher
-from z3c.jsonrpc.publication import JSONRPCPublication
+from z3c.jsonrpc.publisher import JSON_RPC_VERSION
 
 
 ###############################################################################
@@ -78,8 +79,8 @@ class JSONRPCTestTransport(Transport):
             StringIO.StringIO(response.getBody()), sock=None)
 
 
-def JSONRPCTestProxy(uri, transport=None, encoding=None,
-                verbose=None, jsonId=None, handleErrors=True):
+def JSONRPCTestProxy(uri, transport=None, encoding=None, verbose=None,
+    jsonId=None, handleErrors=True, jsonVersion=JSON_RPC_VERSION):
     """A factory that creates a server proxy using the ZopeJSONRPCTestTransport 
     by default."""
     if verbose is None:
@@ -88,7 +89,7 @@ def JSONRPCTestProxy(uri, transport=None, encoding=None,
         transport = JSONRPCTestTransport()
     if isinstance(transport, JSONRPCTestTransport):
         transport.handleErrors = handleErrors
-    return JSONRPCProxy(uri, transport, encoding, verbose, jsonId)
+    return JSONRPCProxy(uri, transport, encoding, verbose, jsonId, jsonVersion)
 
 
 ###############################################################################

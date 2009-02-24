@@ -62,7 +62,7 @@ means that there is no other browser page available if you call them in
 python, e.g. getMultiAdapter((context, request), name='myViewName'). This is
 explicitly done this way. If you'd like to use content form such browser pages
 in a JSON request/call, you can inherit your skin form IJSONRPCLayer and
-IBrowserRequest and register your views for this custom layer.
+IBrowserRequest and register your JSON-RPC views for this custom layer.
 
 
 JSON-RPC server
@@ -271,24 +271,14 @@ Let's try to call our method called ``hello`` we defined before:
   >>> proxy.hello()
   u'Hello World'
 
-  >>> p2 = JSONRPCTestProxy(siteURL + '/container')
-  >>> p2.available()
+  >>> proxy2 = JSONRPCTestProxy(siteURL + '/container')
+  >>> proxy2.available()
   u'Hello World'
 
 Now let's make a remote procedure call with a argument:
 
   >>> proxy.greeting(u'Jessy')
   u'Hello Jessy'
-
-Note that this key word arguments are stored in the request.form. Important
-to know is that JSON-RPC does not support positional and named arguments in
-one method call. We are working on a solution for solve that restriction which
-hurts us as python developer.
-
-  >>> proxy.mixedparams('Hello', foo=u'FOO', bar=u'BAR')
-  Traceback (most recent call last):
-  ...
-  ValueError: Mixing positional and named parameters in one call is not possible
 
 Let's call named arguments:
 
@@ -306,6 +296,97 @@ The proxy also knows this id as jsonId:
 
   >>> proxy.jsonId
   u'my id'
+
+
+JSON-RPC Versions
+-----------------
+
+Let's test the different JSON-RPC versions starting with version 1.0:
+
+  >>> v1 = JSONRPCTestProxy(siteURL + '/container', jsonVersion='1.0')
+  >>> v1.available()
+  u'Hello World'
+
+  >>> v1.greeting(u'Jessy')
+  u'Hello Jessy'
+
+  >>> v1.kws(bar=u'BAR', foo=u'FOO')
+  u'None FOO BAR'
+
+  >>> v1 = JSONRPCTestProxy(siteURL + '/content', jsonId = u'my id',
+  ...     jsonVersion='1.0')
+  >>> v1.showId()
+  u'The json id is: my id'
+
+  >>> v1.jsonId
+  u'my id'
+
+Now test with JSON-RPC version 1.1:
+
+  >>> v11 = JSONRPCTestProxy(siteURL + '/container', jsonVersion='1.1')
+  >>> v11.available()
+  u'Hello World'
+
+  >>> v11.greeting(u'Jessy')
+  u'Hello Jessy'
+
+  >>> v11.kws(bar=u'BAR', foo=u'FOO')
+  u'None FOO BAR'
+
+  >>> v11 = JSONRPCTestProxy(siteURL + '/content', jsonId = u'my id',
+  ...     jsonVersion='1.1')
+  >>> v11.showId()
+  u'The json id is: my id'
+
+  >>> v11.jsonId
+  u'my id'
+
+Now test with JSON-RPC version 2.0:
+
+  >>> v2 = JSONRPCTestProxy(siteURL + '/container', jsonVersion='2.0')
+  >>> v2.available()
+  u'Hello World'
+
+  >>> v2.greeting(u'Jessy')
+  u'Hello Jessy'
+
+  >>> v2.kws(bar=u'BAR', foo=u'FOO')
+  u'None FOO BAR'
+
+  >>> v2 = JSONRPCTestProxy(siteURL + '/content', jsonId = u'my id',
+  ...     jsonVersion='2.0')
+  >>> v2.showId()
+  u'The json id is: my id'
+
+  >>> v2.jsonId
+  u'my id'
+
+
+Mixed parameters
+----------------
+
+Note the keyword arguments will get stored in the request.form. Important
+to know is that JSON-RPC does not support positional and named arguments in
+one method call.
+
+  >>> v1.mixedparams('Hello', foo=u'FOO', bar=u'BAR')
+  Traceback (most recent call last):
+  ...
+  ValueError: Mixing positional and named parameters in one call is not possible
+
+  >>> v11.mixedparams('Hello', foo=u'FOO', bar=u'BAR')
+  Traceback (most recent call last):
+  ...
+  ValueError: Mixing positional and named parameters in one call is not possible
+
+  >>> v2.mixedparams('Hello', foo=u'FOO', bar=u'BAR')
+  Traceback (most recent call last):
+  ...
+  ValueError: Mixing positional and named parameters in one call is not possible
+
+
+Error handling
+--------------
 
 See what happens if the server raises an Exception:
 

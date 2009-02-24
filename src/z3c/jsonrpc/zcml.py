@@ -17,10 +17,12 @@ $Id:$
 __docformat__ = "reStructuredText"
 
 import zope.interface
+import zope.component
 import zope.configuration.fields
 import zope.interface
 import zope.schema
 import zope.security.zcml
+from zope.publisher.interfaces.browser import IDefaultSkin
 
 from zope.interface import Interface
 from zope.security.checker import CheckerPublic, Checker
@@ -208,3 +210,29 @@ def jsonrpc(_context, for_=None, interface=None, methods=None, class_=None,
             callable = provideInterface,
             args = ('', for_)
             )
+
+
+class IDefaultJSONRPCSkinDirective(zope.interface.Interface):
+    """Sets the default JSON-RPC skin."""
+
+    name = zope.schema.TextLine(
+        title=u"Default skin name",
+        description=u"Default skin name",
+        required=True
+        )
+
+
+def setDefaultJSONRPCSkin(name, info=''):
+    """Set the default skin."""
+    skin = zope.component.getUtility(interfaces.IJSONRPCSkinType, name=name)
+    handler('registerAdapter', skin, (interfaces.IJSONRPCRequest,),
+        IDefaultSkin, '', info),
+
+
+def defaultJSONRPCSkin(_context, name):
+
+    _context.action(
+        discriminator = 'setDefaultJSONRPCSkin',
+        callable = setDefaultJSONRPCSkin,
+        args = (name, _context.info)
+        )

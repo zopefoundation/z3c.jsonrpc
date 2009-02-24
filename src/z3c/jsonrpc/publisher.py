@@ -24,6 +24,7 @@ import zope.interface
 import zope.component
 from zope.location.location import Location
 from zope.i18n.interfaces import IUserPreferredCharsets
+from zope.publisher.interfaces.browser import IDefaultSkin
 from zope.publisher.http import HTTPRequest
 from zope.publisher.http import HTTPResponse
 from zope.publisher.http import getCharsetUsingRequest
@@ -43,6 +44,14 @@ logger = logging.getLogger()
 
 def intsort(item):
     return int(item[0])
+
+
+def setDefaultSkin(request):
+    """Sets the default skin for the JONS-RPC request."""
+    adapters = zope.component.getSiteManager().adapters
+    skin = adapters.lookup((zope.interface.providedBy(request),), IDefaultSkin, '')
+    if skin is not None:
+        zope.interface.directlyProvides(request, skin)
 
 
 class MethodPublisher(Location):
@@ -257,6 +266,26 @@ class JSONRPCRequest(HTTPRequest):
 
     def __getitem__(self, key):
         return self.get(key)
+
+    def retry(self):
+        """Set default JSONRPC skin if available."""
+        count = getattr(self, '_retry_count', 0)
+        self._retry_count = count + 1
+
+        request = self.__class__(
+            # Use the cache stream as the new input stream.
+            body_instream=self._body_instream.getCacheStream(),
+            environ=self._orig_env,
+            response=self.response.retry(),
+            )
+        # restore the default skin
+        if interfaces.IJSONRPCRequest.providedBy(self):
+            # only browser requests have skins
+            setDefaultSkin(request)
+
+        request.setPublication(self.publication)
+        request._retry_count = self._retry_count
+        return request
 
 
 class JSONRPCResponse(HTTPResponse):

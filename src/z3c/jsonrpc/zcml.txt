@@ -73,3 +73,25 @@ Note the object b does not know the view within the default request layer:
 
   >>> zope.component.queryMultiAdapter((b, request), name='hello') is None
   True
+
+
+setDefaultJSONRPCSkin
+---------------------
+
+  >>> from zope.interface import directlyProvides
+  >>> from zope.publisher.interfaces.browser import IDefaultSkin
+  >>> from z3c.jsonrpc import interfaces
+  >>> import z3c.jsonrpc.zcml
+
+  >>> class Skin: pass
+  >>> directlyProvides(Skin, interfaces.IJSONRPCSkinType)
+
+  >>> zope.component.provideUtility(Skin, interfaces.IJSONRPCSkinType,
+  ...     name='JSONRPC')
+  >>> z3c.jsonrpc.zcml.setDefaultJSONRPCSkin('JSONRPC')
+  >>> adapters = zope.component.getSiteManager().adapters
+
+Lookup the default skin for a request that has the
+
+  >>> adapters.lookup((interfaces.IJSONRPCRequest,), IDefaultSkin, '') is Skin
+  True

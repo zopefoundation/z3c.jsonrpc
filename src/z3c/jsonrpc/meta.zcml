@@ -3,11 +3,18 @@
     xmlns="http://namespaces.zope.org/zope">
     
   <meta:directive
-       namespace="http://namespaces.zope.org/z3c"
-       name="jsonrpc"
-       schema=".zcml.IJSONRPCDirective"
-       handler=".zcml.jsonrpc"
-       />
+      namespace="http://namespaces.zope.org/z3c"
+      name="jsonrpc"
+      schema=".zcml.IJSONRPCDirective"
+      handler=".zcml.jsonrpc"
+      />
+
+  <meta:directive
+      namespace="http://namespaces.zope.org/z3c"
+      name="defaultJSONRPCSkin"
+      schema=".zcml.IDefaultJSONRPCSkinDirective"
+      handler=".zcml.defaultJSONRPCSkin"
+      />
        
     <meta:provides feature="z3c.jsonrpc" />
 
