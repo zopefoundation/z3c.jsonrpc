@@ -226,7 +226,7 @@ def setDefaultJSONRPCSkin(name, info=''):
     """Set the default skin."""
     skin = zope.component.getUtility(interfaces.IJSONRPCSkinType, name=name)
     handler('registerAdapter', skin, (interfaces.IJSONRPCRequest,),
-        IDefaultSkin, '', info),
+        interfaces.IDefaultSkin, '', info),
 
 
 def defaultJSONRPCSkin(_context, name):

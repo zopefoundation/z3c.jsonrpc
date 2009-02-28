@@ -59,3 +59,17 @@ class IJSONRPCRequest(IJSONRPCApplicationRequest, IHTTPCredentials,
     """JSON-RPC request."""
 
     jsonID = zope.interface.Attribute("""JSON-RPC ID for the request""")
+
+
+class IDefaultSkin(zope.interface.Interface):
+    """Any component providing this interface must be a skin.
+
+    This is a marker interface, so that we can register the default skin as an
+    adapter from the presentation type to `IDefaultSkin`.
+    """
+
+
+class ISkinChangedEvent(zope.interface.Interface):
+    """Event that gets triggered when the skin of a request is changed."""
+
+    request = zope.interface.Attribute("The request for which the skin was changed.")

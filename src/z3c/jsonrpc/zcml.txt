@@ -78,20 +78,34 @@ Note the object b does not know the view within the default request layer:
 setDefaultJSONRPCSkin
 ---------------------
 
-  >>> from zope.interface import directlyProvides
-  >>> from zope.publisher.interfaces.browser import IDefaultSkin
   >>> from z3c.jsonrpc import interfaces
   >>> import z3c.jsonrpc.zcml
 
-  >>> class Skin: pass
-  >>> directlyProvides(Skin, interfaces.IJSONRPCSkinType)
+  >>> class IMySkin(zope.interface.Interface):
+  ...     pass
+  >>> zope.interface.directlyProvides(IMySkin, interfaces.IJSONRPCSkinType)
 
-  >>> zope.component.provideUtility(Skin, interfaces.IJSONRPCSkinType,
+  >>> zope.component.provideUtility(IMySkin, interfaces.IJSONRPCSkinType,
   ...     name='JSONRPC')
   >>> z3c.jsonrpc.zcml.setDefaultJSONRPCSkin('JSONRPC')
   >>> adapters = zope.component.getSiteManager().adapters
 
 Lookup the default skin for a request that has the
 
-  >>> adapters.lookup((interfaces.IJSONRPCRequest,), IDefaultSkin, '') is Skin
+  >>> adapters.lookup((interfaces.IJSONRPCRequest,),
+  ...     interfaces.IDefaultSkin, '') is IMySkin
+  True
+
+Let's test if our request instance will provide this IDefaultSkin after we
+create an instance. The old request shoud not provide taht skin since we
+created the request instance before we registered the default skin:
+
+  >>> IMySkin.providedBy(request)
+  False
+
+But since we have a default skin utility registered as a skin type for our 
+request, a new request instance should provide the default skin:
+
+  >>> request = TestRequest()
+  >>> IMySkin.providedBy(request)
   True

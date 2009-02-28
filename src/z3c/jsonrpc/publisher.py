@@ -22,9 +22,9 @@ import logging
 
 import zope.interface
 import zope.component
+import zope.event
 from zope.location.location import Location
 from zope.i18n.interfaces import IUserPreferredCharsets
-from zope.publisher.interfaces.browser import IDefaultSkin
 from zope.publisher.http import HTTPRequest
 from zope.publisher.http import HTTPResponse
 from zope.publisher.http import getCharsetUsingRequest
@@ -46,12 +46,32 @@ def intsort(item):
     return int(item[0])
 
 
+class SkinChangedEvent(object):
+
+    zope.interface.implements(interfaces.ISkinChangedEvent)
+
+    def __init__(self, request):
+        self.request = request
+
+
 def setDefaultSkin(request):
     """Sets the default skin for the JONS-RPC request."""
     adapters = zope.component.getSiteManager().adapters
-    skin = adapters.lookup((zope.interface.providedBy(request),), IDefaultSkin, '')
+    skin = adapters.lookup((zope.interface.providedBy(request),),
+        interfaces.IDefaultSkin, '')
     if skin is not None:
         zope.interface.directlyProvides(request, skin)
+
+
+def applySkin(request, skin):
+    """Change the presentation skin for this request."""
+    # Remove all existing skin declarations (commonly the default skin).
+    ifaces = [iface for iface in zope.interface.directlyProvidedBy(request)
+              if not interfaces.IJSONRPCSkinType.providedBy(iface)]
+    # Add the new skin.
+    ifaces.append(skin)
+    zope.interface.directlyProvides(request, *ifaces)
+    zope.event.notify(SkinChangedEvent(request))
 
 
 class MethodPublisher(Location):
@@ -123,6 +143,12 @@ class JSONRPCRequest(HTTPRequest):
         self._args = ()
         self.charsets = None
         super(JSONRPCRequest, self).__init__(body_instream, environ, response)
+        # set the default skin. This is a workaround which allows us to set a
+        # default skin. The real concept used in the class
+        # HTTPPublicationRequestFactory does this before setPublication is
+        # called. We don't have any chance to hook into the existing concept.
+        # Let's just do it here.
+        setDefaultSkin(self)
 
     def _createResponse(self):
         """return a response"""
