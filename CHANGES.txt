@@ -2,8 +2,8 @@
 CHANGES
 =======
 
-Version 0.5.3dev (unreleased)
------------------------------
+Version 0.5.3 (2009-03-10)
+--------------------------
 
 - Fix: reflect skin lookup changes in zope.publisher. Use the new skinnable
   concept.
