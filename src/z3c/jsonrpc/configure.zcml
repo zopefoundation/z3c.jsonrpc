@@ -1,13 +1,11 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
-    i18n_domain="zope">
-
+    i18n_domain="z3c">
 
   <interface
       interface="z3c.jsonrpc.layer.IJSONRPCLayer"
-      type="zope.publisher.interfaces.browser.IBrowserSkinType"
+      type="z3c.jsonrpc.interfaces.IJSONRPCSkinType"
       />
-
 
   <!-- JSON-RPC server -->
   <publisher
@@ -51,14 +49,27 @@
       permission="zope.Public"
       />
 
-
-  <!-- skin namespace -->
-  <view
-      name="skin" type="z3c.jsonrpc.interfaces.IJSONRPCRequest"
-      provides="zope.traversing.interfaces.ITraversable" for="*"
+  <!-- Be careful and register the skin namespace for our request and layer.
+       This will prevents that we can simply get the wrong skin namespace
+       based on the __iro__ order of our layer and request interfaces.
+       Note, if we don't choose carefully our layer and request interfaces
+       for our skin, it's possible that we get the skin namespace registered
+       for the browser request -->
+  <adapter
+      name="skin"
       factory=".namespace.skin"
+      for="zope.interface.Interface
+           z3c.jsonrpc.layer.IJSONRPCLayer"
+      provides="zope.traversing.interfaces.ITraversable"
       />
 
+  <adapter
+      name="skin"
+      factory=".namespace.skin"
+      for="zope.interface.Interface
+           z3c.jsonrpc.interfaces.IJSONRPCRequest"
+      provides="zope.traversing.interfaces.ITraversable"
+      />
 
   <include file="error.zcml" />
 

@@ -22,7 +22,7 @@ import zope.configuration.fields
 import zope.interface
 import zope.schema
 import zope.security.zcml
-from zope.publisher.interfaces.browser import IDefaultSkin
+from zope.publisher.interfaces import IDefaultSkin
 
 from zope.interface import Interface
 from zope.security.checker import CheckerPublic, Checker
@@ -226,7 +226,7 @@ def setDefaultJSONRPCSkin(name, info=''):
     """Set the default skin."""
     skin = zope.component.getUtility(interfaces.IJSONRPCSkinType, name=name)
     handler('registerAdapter', skin, (interfaces.IJSONRPCRequest,),
-        interfaces.IDefaultSkin, '', info),
+        IDefaultSkin, '', info),
 
 
 def defaultJSONRPCSkin(_context, name):

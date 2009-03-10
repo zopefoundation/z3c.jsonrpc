@@ -5,6 +5,9 @@ CHANGES
 Version 0.5.3dev (unreleased)
 -----------------------------
 
+- Fix: reflect skin lookup changes in zope.publisher. Use the new skinnable
+  concept.
+
 - Fix: The default skin didn't get applied based on the inherited concept give
   from the zope.publisher.browser implementation because our JSON-RPC request
   doesn't provide IBrowserRequest. Added a workaround which will apply a given

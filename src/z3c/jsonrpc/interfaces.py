@@ -17,13 +17,14 @@ $Id:$
 __docformat__ = "reStructuredText"
 
 import zope.interface
-from zope.interface.interfaces import IInterface
+from zope.publisher.interfaces import IPublication
 from zope.publisher.interfaces import IPublishTraverse
+from zope.publisher.interfaces import ISkinnable
+from zope.publisher.interfaces import ISkinType
 from zope.publisher.interfaces.http import IHTTPApplicationRequest
 from zope.publisher.interfaces.http import IHTTPCredentials
-from zope.publisher.interfaces import IPublication
-from zope.app.publication.interfaces import IRequestFactory
 from zope.publisher.interfaces.http import IHTTPRequest
+from zope.app.publication.interfaces import IRequestFactory
 
 JSON_CHARSETS = ('utf-8','utf-16', 'utf-32')
 
@@ -46,7 +47,7 @@ class IJSONRPCPublication(IPublication):
     """Publication for JOSN-RPC-based protocol."""
 
 
-class IJSONRPCSkinType(IInterface):
+class IJSONRPCSkinType(ISkinType):
     """A skin is a set of layers."""
 
 
@@ -55,21 +56,7 @@ class IJSONRPCApplicationRequest(IHTTPApplicationRequest):
 
 
 class IJSONRPCRequest(IJSONRPCApplicationRequest, IHTTPCredentials,
-    IHTTPRequest):
+    IHTTPRequest, ISkinnable):
     """JSON-RPC request."""
 
     jsonID = zope.interface.Attribute("""JSON-RPC ID for the request""")
-
-
-class IDefaultSkin(zope.interface.Interface):
-    """Any component providing this interface must be a skin.
-
-    This is a marker interface, so that we can register the default skin as an
-    adapter from the presentation type to `IDefaultSkin`.
-    """
-
-
-class ISkinChangedEvent(zope.interface.Interface):
-    """Event that gets triggered when the skin of a request is changed."""
-
-    request = zope.interface.Attribute("The request for which the skin was changed.")

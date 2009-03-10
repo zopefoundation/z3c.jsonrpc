@@ -25,7 +25,6 @@ from zope.app.publication.requestpublicationregistry import factoryRegistry
 
 from z3c.jsonrpc import interfaces
 from z3c.jsonrpc.publisher import JSONRPCRequest
-from z3c.jsonrpc.publisher import setDefaultSkin
 
 
 class JSONRPCPublication(BaseHTTPPublication):

@@ -34,7 +34,6 @@ from z3c.json.interfaces import IJSONReader
 from z3c.json.interfaces import IJSONWriter
 from z3c.json.converter import premarshal
 from z3c.jsonrpc import interfaces
-from z3c.jsonrpc.interfaces import JSON_CHARSETS
 
 JSON_RPC_VERSION = '2.0'
 
@@ -44,34 +43,6 @@ logger = logging.getLogger()
 
 def intsort(item):
     return int(item[0])
-
-
-class SkinChangedEvent(object):
-
-    zope.interface.implements(interfaces.ISkinChangedEvent)
-
-    def __init__(self, request):
-        self.request = request
-
-
-def setDefaultSkin(request):
-    """Sets the default skin for the JONS-RPC request."""
-    adapters = zope.component.getSiteManager().adapters
-    skin = adapters.lookup((zope.interface.providedBy(request),),
-        interfaces.IDefaultSkin, '')
-    if skin is not None:
-        zope.interface.directlyProvides(request, skin)
-
-
-def applySkin(request, skin):
-    """Change the presentation skin for this request."""
-    # Remove all existing skin declarations (commonly the default skin).
-    ifaces = [iface for iface in zope.interface.directlyProvidedBy(request)
-              if not interfaces.IJSONRPCSkinType.providedBy(iface)]
-    # Add the new skin.
-    ifaces.append(skin)
-    zope.interface.directlyProvides(request, *ifaces)
-    zope.event.notify(SkinChangedEvent(request))
 
 
 class MethodPublisher(Location):
@@ -143,12 +114,6 @@ class JSONRPCRequest(HTTPRequest):
         self._args = ()
         self.charsets = None
         super(JSONRPCRequest, self).__init__(body_instream, environ, response)
-        # set the default skin. This is a workaround which allows us to set a
-        # default skin. The real concept used in the class
-        # HTTPPublicationRequestFactory does this before setPublication is
-        # called. We don't have any chance to hook into the existing concept.
-        # Let's just do it here.
-        setDefaultSkin(self)
 
     def _createResponse(self):
         """return a response"""
@@ -293,26 +258,6 @@ class JSONRPCRequest(HTTPRequest):
     def __getitem__(self, key):
         return self.get(key)
 
-    def retry(self):
-        """Set default JSONRPC skin if available."""
-        count = getattr(self, '_retry_count', 0)
-        self._retry_count = count + 1
-
-        request = self.__class__(
-            # Use the cache stream as the new input stream.
-            body_instream=self._body_instream.getCacheStream(),
-            environ=self._orig_env,
-            response=self.response.retry(),
-            )
-        # restore the default skin
-        if interfaces.IJSONRPCRequest.providedBy(self):
-            # only browser requests have skins
-            setDefaultSkin(request)
-
-        request.setPublication(self.publication)
-        request._retry_count = self._retry_count
-        return request
-
 
 class JSONRPCResponse(HTTPResponse):
     """JSON-RPC Response"""
@@ -357,7 +302,7 @@ class JSONRPCResponse(HTTPResponse):
         # we've asked json to return unicode; result should be unicode
         encoding = getCharsetUsingRequest(self._request) or 'utf-8'
         enc = encoding.lower()
-        if not enc in JSON_CHARSETS:
+        if not enc in interfaces.JSON_CHARSETS:
             encoding = 'utf-8'
         # encode outgoing boundary.
         if isinstance(result, unicode):

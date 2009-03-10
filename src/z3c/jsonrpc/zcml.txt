@@ -85,27 +85,42 @@ setDefaultJSONRPCSkin
   ...     pass
   >>> zope.interface.directlyProvides(IMySkin, interfaces.IJSONRPCSkinType)
 
-  >>> zope.component.provideUtility(IMySkin, interfaces.IJSONRPCSkinType,
-  ...     name='JSONRPC')
-  >>> z3c.jsonrpc.zcml.setDefaultJSONRPCSkin('JSONRPC')
-  >>> adapters = zope.component.getSiteManager().adapters
+Before we setup a default request, we try to set a default request for our
+request:
 
-Lookup the default skin for a request that has the
+  >>> from zope.publisher.skinnable import setDefaultSkin
+  >>> setDefaultSkin(request)
 
-  >>> adapters.lookup((interfaces.IJSONRPCRequest,),
-  ...     interfaces.IDefaultSkin, '') is IMySkin
-  True
-
-Let's test if our request instance will provide this IDefaultSkin after we
-create an instance. The old request shoud not provide taht skin since we
-created the request instance before we registered the default skin:
+Our request should not provide any default kins since we didn't register any:
 
   >>> IMySkin.providedBy(request)
   False
 
-But since we have a default skin utility registered as a skin type for our 
+Now let's register a default skin:
+
+  >>> zope.component.provideUtility(IMySkin, interfaces.IJSONRPCSkinType,
+  ...     name='JSONRPC')
+  >>> z3c.jsonrpc.zcml.setDefaultJSONRPCSkin('JSONRPC')
+
+We can lookup a default skin from the adapter registry: 
+
+  >>> from zope.publisher.interfaces import IDefaultSkin
+  >>> adapters = zope.component.getSiteManager().adapters
+  >>> default = adapters.lookup((interfaces.IJSONRPCRequest,), IDefaultSkin, '')
+  >>> default is IMySkin
+  True
+
+Since we have a default skin utility registered as a skin type for our 
 request, a new request instance should provide the default skin:
 
   >>> request = TestRequest()
+  >>> setDefaultSkin(request)
   >>> IMySkin.providedBy(request)
   True
+
+We can get the applied default skin by look for our skin type:
+
+  >>> for iface in zope.interface.providedBy(request):
+  ...     if interfaces.IJSONRPCSkinType.providedBy(iface):
+  ...         print "%s" % iface
+  <InterfaceClass README.IMySkin>
