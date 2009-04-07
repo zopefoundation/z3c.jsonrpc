@@ -249,7 +249,6 @@ falls back to the browser request factory:
   ...
   NotFound: Object: <zope.site.folder.Folder...: u'++skin++JSONRPCTestSkin'
 
-
 Testing
 -------
 
@@ -270,6 +269,19 @@ Let's try to call our method called ``hello`` we defined before:
   >>> proxy = JSONRPCTestProxy(siteURL + '/content')
   >>> proxy.hello()
   u'Hello World'
+
+As defined in the jsonrpc spec it is also allowed to omit the params
+completly we need to test this with a post directly because the
+testing proxy always sets the params.
+
+  >>> browser.post(siteURL + '/content', "{'method':'hello', 'id':1}",
+  ...              content_type='application/json')
+  >>> browser.contents
+  '{"jsonrpc":"2.0","result":"Hello World","id":1}'
+  >>> browser.post(siteURL + '/content', "{'method':'hello', 'params':null, 'id':1}",
+  ...              content_type='application/json')
+  >>> browser.contents
+  '{"jsonrpc":"2.0","result":"Hello World","id":1}'
 
   >>> proxy2 = JSONRPCTestProxy(siteURL + '/container')
   >>> proxy2.available()

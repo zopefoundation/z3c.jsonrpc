@@ -154,7 +154,7 @@ class JSONRPCRequest(HTTPRequest):
             # parser
             raise ParseError
         # get the params
-        params = data['params']
+        params = data.get('params', [])
         if self.jsonId is None:
             self.jsonId = data.get('id', self._jsonId)
 
@@ -220,6 +220,8 @@ class JSONRPCRequest(HTTPRequest):
                             if type_name == 'tuple' and not isinstance(d, tuple):
                                 d = tuple(d)
                     self.form[key] = d
+                args = []
+            elif params is None:
                 args = []
         else:
             raise TypeError, 'Unsupported JSON-RPC version (%s)' % \
