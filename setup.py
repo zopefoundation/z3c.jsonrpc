@@ -61,6 +61,7 @@ setup (
         test = [
             'z3c.coverage',
             'zope.app.testing',
+            'zope.app.security',
             'zope.testbrowser',
             'zope.testing',
             ],
