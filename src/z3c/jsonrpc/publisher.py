@@ -22,7 +22,6 @@ import logging
 
 import zope.interface
 import zope.component
-import zope.event
 from zope.location.location import Location
 from zope.i18n.interfaces import IUserPreferredCharsets
 from zope.publisher.http import HTTPRequest

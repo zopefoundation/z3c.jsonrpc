@@ -74,6 +74,7 @@ setup (
         'zope.component',
         'zope.configuration',
         'zope.i18n',
+        'zope.i18nmessageid',
         'zope.interface',
         'zope.location',
         'zope.publisher',

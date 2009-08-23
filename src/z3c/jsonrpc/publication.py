@@ -21,7 +21,6 @@ import zope.component
 from zope.app.publication.http import BaseHTTPPublication
 from zope.app.publication.interfaces import IRequestPublicationFactory
 from zope.app.publication.interfaces import IPublicationRequestFactory
-from zope.app.publication.requestpublicationregistry import factoryRegistry
 
 from z3c.jsonrpc import interfaces
 from z3c.jsonrpc.publisher import JSONRPCRequest
