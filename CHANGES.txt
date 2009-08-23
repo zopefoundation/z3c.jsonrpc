@@ -2,6 +2,20 @@
 CHANGES
 =======
 
+0.6.0 (unreleased)
+------------------
+
+- implemented error view concept which will work with ZopePublication
+
+- implemented default error view for known zope and JSON-RPC errors
+
+- use DirectResult in response
+
+- removed unauthenticated error view. This was not working and requires a
+  custom concept supported by the used java script library used at client 
+  side
+
+
 Version 0.5.4 (2009-04-07)
 --------------------------
 

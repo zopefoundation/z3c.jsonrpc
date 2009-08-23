@@ -3,12 +3,88 @@
     xmlns="http://namespaces.zope.org/browser"
     i18n_domain="z3c">
 
-  <!-- implement error views for this exceptions
-       The error views should return a 1i8n aware error message as result
-       which get set in setResult instead of using the built in 
-       handleException form the JSONRPCResponse. 
-       See zope.app.publication.zopepublication.ZopePublication
-  -->
+  <!-- zope error views used by ZopePublication -->
+  <page
+      name="error"
+      class=".error.InternalErrorView"
+      for="zope.interface.common.interfaces.IException"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+  <page
+      name="error"
+      class=".error.MethodNotFoundView"
+      for="zope.publisher.interfaces.INotFound"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+  <page
+      name="error"
+      class=".error.MethodNotFoundView"
+      for="zope.publisher.interfaces.ITraversalException"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+  <page
+      name="error"
+      class=".error.InternalErrorView"
+      for="zope.exceptions.interfaces.IUserError"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+
+
+  <!-- JSON-RPC error views used by ZopePublication -->
+  <page
+      name="error"
+      class=".error.InternalErrorView"
+      for=".interfaces.IJSONRPCException"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+  <page
+      name="error"
+      class=".error.ParseErrorView"
+      for=".exception.ParseError"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+  <page
+      name="error"
+      class=".error.InvalidRequestErrorView"
+      for=".exception.InvalidRequest"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+  <page
+      name="error"
+      class=".error.MethodNotFoundView"
+      for=".exception.MethodNotFound"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+  <page
+      name="error"
+      class=".error.InvalidParamsErrorView"
+      for=".exception.InvalidParams"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+  <page
+      name="error"
+      class=".error.InternalErrorView"
+      for=".exception.InternalError"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      permission="zope.Public"
+      />
+
+  <!-- default view names -->
+  <defaultView
+      name="error"
+      for=".interfaces.IJSONRPCException"
+      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
+      />
+
   <defaultView
       name="error"
       for="zope.interface.common.interfaces.IException"
@@ -18,21 +94,6 @@
   <defaultView
       name="error"
       for="zope.publisher.interfaces.ITraversalException"
-      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
-      />
-
-  <!-- IUnauthorized -->
-  <page
-      name="error"
-      class=".error.UnauthorizedResponse"
-      for="zope.security.interfaces.IUnauthorized"
-      layer="z3c.jsonrpc.layer.IJSONRPCLayer"
-      permission="zope.Public"
-      />
-
-  <defaultView
-      name="error"
-      for="zope.security.interfaces.IUnauthorized"
       layer="z3c.jsonrpc.layer.IJSONRPCLayer"
       />
 

@@ -49,12 +49,15 @@
       permission="zope.Public"
       />
 
-  <!-- Be careful and register the skin namespace for our request and layer.
-       This will prevents that we can simply get the wrong skin namespace
-       based on the __iro__ order of our layer and request interfaces.
-       Note, if we don't choose carefully our layer and request interfaces
-       for our skin, it's possible that we get the skin namespace registered
-       for the browser request -->
+  <!-- If you register your own layer and skin setup, be careful and register
+       the skin namespace below for our JSON-RPC layer. This will prevents
+       that you will get the wrong skin namespace based on the __iro__ order of
+       the layer interfaces. 
+       
+       Since JSON-RPC supports layers and skins it's highly recommended not to
+       mix IJSONRPCLayer and IBrowserRequest layers. Otherwise you have to make
+       sure that the right default skin interface get applied.
+       -->
   <adapter
       name="skin"
       factory=".namespace.skin"

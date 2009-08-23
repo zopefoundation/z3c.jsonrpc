@@ -400,17 +400,18 @@ one method call.
 Error handling
 --------------
 
-See what happens if the server raises an Exception:
+See what happens if the server raises an Exception. We will get a response
+error with additional error content:
 
   >>> proxy.forceValueError()
   Traceback (most recent call last):
   ...
   ResponseError: Check proxy.error for error message
 
-and the error message is:
+and the error content looks like:
 
   >>> proxy.error
-  {u'message': u'Invalid JSON-RPC', u'code': -32603, u'data': u'ValueError: Something was wrong in server method.'}
+  {u'message': u'Internal error', u'code': -32603, u'data': {u'i18nMessage': u'Internal error'}}
 
 The error property gets reset on the next successfull call:
 

@@ -16,6 +16,7 @@ $Id:$
 """
 __docformat__ = "reStructuredText"
 
+import zope.schema
 import zope.interface
 from zope.publisher.interfaces import IPublication
 from zope.publisher.interfaces import IPublishTraverse
@@ -60,3 +61,36 @@ class IJSONRPCRequest(IJSONRPCApplicationRequest, IHTTPCredentials,
     """JSON-RPC request."""
 
     jsonID = zope.interface.Attribute("""JSON-RPC ID for the request""")
+
+
+class IJSONRPCException(zope.interface.Interface):
+    """JSON-RPC error"""
+
+
+class IJSONRPCErrorView(zope.interface.Interface):
+    """Error view base class used by ZopePublications error handling.
+    """
+
+    code = zope.schema.Int(
+        title=u'Error code',
+        description=u'JSON-RPC error code',
+        default=-32603,
+        required=True)
+
+    message = zope.schema.Text(
+        title=u'Error message',
+        description=u'JSON-RPC error message',
+        default=u'Internal error',
+        required=True)
+
+    data = zope.schema.Text(
+        title=u'Error data',
+        description=u'JSON-RPC error data',
+        default=u'',
+        required=True)
+
+    def __init__(self):
+        """Adapts an error and a request."""
+
+    def __call__(self):
+        """Must return itself by calling."""

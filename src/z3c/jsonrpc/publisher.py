@@ -28,6 +28,7 @@ from zope.i18n.interfaces import IUserPreferredCharsets
 from zope.publisher.http import HTTPRequest
 from zope.publisher.http import HTTPResponse
 from zope.publisher.http import getCharsetUsingRequest
+from zope.publisher.http import DirectResult
 from zope.security.proxy import isinstance
 
 from z3c.json.interfaces import IJSONReader
@@ -264,7 +265,6 @@ class JSONRPCRequest(HTTPRequest):
 class JSONRPCResponse(HTTPResponse):
     """JSON-RPC Response"""
 
-
     def setResult(self, result):
         """The result dict contains the following key value pairs
 
@@ -286,19 +286,50 @@ class JSONRPCResponse(HTTPResponse):
         """
         jsonId = self._request.jsonId
         jsonVersion = self._request.jsonVersion
-        result = premarshal(result)
-        if jsonVersion == "1.0":
-            wrapper = {'result': result, 'error': None, 'id': jsonId}
-        elif jsonVersion == "1.1":
-            wrapper = {'version': jsonVersion, 'result': result, 'id': jsonId}
+
+        if interfaces.IJSONRPCErrorView.providedBy(result):
+            if self._request.jsonVersion == "1.0":
+                wrapper = {'result': None,
+                           'error': result.message,
+                           'id': self._request.jsonId}
+            elif self._request.jsonVersion == "1.1":
+                wrapper = {'version': self._request.jsonVersion,
+                           'error': result.message,
+                           'id': self._request.jsonId}
+            else:
+                wrapper = {'jsonrpc': self._request.jsonVersion,
+                           'error': {'code': result.code,
+                                     'message': result.message,
+                                     'data': result.data},
+                           'id': self._request.jsonId}
+    
+            try:
+                json = zope.component.getUtility(IJSONWriter)
+                result = json.write(wrapper)
+                body = self._prepareResult(result)
+                super(JSONRPCResponse, self).setResult(DirectResult((body,)))
+                logger.log(DEBUG, "Exception: %s" % result)
+                # error response is not really an error, it's valid response
+                self.setStatus(200)
+            except:
+                # Catch all exceptions at this point
+                self.handleException(sys.exc_info())
+                return
+
         else:
-            wrapper = {'jsonrpc': jsonVersion, 'result': result, 'id': jsonId}
-        json = zope.component.getUtility(IJSONWriter)
-        encoding = getCharsetUsingRequest(self._request)
-        result = json.write(wrapper)
-        body = self._prepareResult(result)
-        super(JSONRPCResponse,self).setResult(body)
-        logger.log(DEBUG, "%s" % result)
+            result = premarshal(result)
+            if jsonVersion == "1.0":
+                wrapper = {'result': result, 'error': None, 'id': jsonId}
+            elif jsonVersion == "1.1":
+                wrapper = {'version': jsonVersion, 'result': result, 'id': jsonId}
+            else:
+                wrapper = {'jsonrpc': jsonVersion, 'result': result, 'id': jsonId}
+            json = zope.component.getUtility(IJSONWriter)
+            encoding = getCharsetUsingRequest(self._request)
+            result = json.write(wrapper)
+            body = self._prepareResult(result)
+            super(JSONRPCResponse,self).setResult(DirectResult((body,)))
+            logger.log(DEBUG, "%s" % result)
 
     def _prepareResult(self, result):
         # we've asked json to return unicode; result should be unicode
@@ -320,6 +351,10 @@ class JSONRPCResponse(HTTPResponse):
         return body
 
     def handleException(self, exc_info):
+        # only legacy Exception where we didn't define a view for get handled
+        # by this method. All exceptions where we have a view registered for
+        # get handled by the setResult method based on the given
+        # IJSONRPCErrorView
         t, value = exc_info[:2]
         exc_data = []
         for file, lineno, function, text in traceback.extract_tb(exc_info[2]):
@@ -332,15 +367,14 @@ class JSONRPCResponse(HTTPResponse):
         if self._request.jsonVersion == "1.0":
             wrapper = {'result': None,
                        'error': s,
-                       'id': self._request.jsonId,}
+                       'id': self._request.jsonId}
         elif self._request.jsonVersion == "1.1":
             wrapper = {'version': self._request.jsonVersion,
                        'error': s,
-                       'id': self._request.jsonId,}
+                       'id': self._request.jsonId}
         else:
-            # TODO: implement better error handling, use the right error codes.
-            # see:
-            # http://groups.google.com/group/json-rpc/web/json-rpc-1-2-proposal#error-object
+            # this only happens if error handling was running into en error or
+            # if we didn't define an IJSONRPCErrorView for a given error
             wrapper = {'jsonrpc': self._request.jsonVersion,
                        'error': {'code': -32603,
                                  'message': 'Invalid JSON-RPC',
@@ -350,6 +384,6 @@ class JSONRPCResponse(HTTPResponse):
         json = zope.component.getUtility(IJSONWriter)
         result = json.write(wrapper)
         body = self._prepareResult(result)
-        super(JSONRPCResponse, self).setResult(body)
+        super(JSONRPCResponse, self).setResult(DirectResult((body,)))
         logger.log(DEBUG, "Exception: %s" % result)
         self.setStatus(200)

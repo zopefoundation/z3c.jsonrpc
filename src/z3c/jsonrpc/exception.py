@@ -15,22 +15,14 @@
 $Id:$
 """
 
+import zope.interface
+from z3c.jsonrpc import interfaces
 
-# The error codes used since JSON-RPC 2.0:
-#
-# code   message           Meaning 
-# --------------------------------
-# -32700 Parse error.          Invalid JSON. An error occurred on the server 
-#                              while parsing the JSON text.
-# -32600 Invalid Request.      The received JSON not a valid JSON-RPC Request.
-# -32601 Method not found.     The requested remote-procedure does not exist, 
-#                              is not available.
-# -32602 Invalid params.       Invalid method parameters.
-# -32603 Internal error.       Internal JSON-RPC error.
-# -32099..-32000 Server error. Reserved for implementation-defined server-errors.
 
 class JSONRPCException(Exception):
     """Base class for JSON-RPC exception."""
+
+    zope.interface.implements(interfaces.IJSONRPCException)
 
 
 class ParseError(JSONRPCException):
