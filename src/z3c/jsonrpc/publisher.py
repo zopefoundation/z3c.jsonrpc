@@ -239,8 +239,6 @@ class JSONRPCRequest(HTTPRequest):
             self.setPathSuffix(function)
 
     def traverse(self, object):
-        from pub.dbgpclient import brk; brk('192.168.32.1')
-
         return super(JSONRPCRequest, self).traverse(object)
 
     def keys(self):
