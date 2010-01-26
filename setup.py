@@ -73,6 +73,7 @@ setup (
         'zope.app.twisted',
         'zope.component',
         'zope.configuration',
+        'zope.container',
         'zope.i18n',
         'zope.i18nmessageid',
         'zope.interface',
