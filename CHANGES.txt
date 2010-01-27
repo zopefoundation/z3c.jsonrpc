@@ -5,6 +5,10 @@ CHANGES
 0.6.0 (unreleased)
 ------------------
 
+- cleanup setup dependencies, adjust ftesting.zcml
+
+- adjust coverag report setup
+
 - implemented error view concept which will work with ZopePublication
 
 - implemented default error view for known zope and JSON-RPC errors

@@ -115,11 +115,11 @@ And define a JSONRPC method view:
 Let's define a content object that is a container:
 
   >>> import zope.interface
-  >>> class IDemoContainer(zope.app.container.interfaces.IReadContainer):
+  >>> class IDemoContainer(zope.container.interfaces.IReadContainer):
   ...     """Demo container interface."""
 
   >>> import persistent
-  >>> from zope.app.container import btree
+  >>> from zope.container import btree
 
   >>> class DemoContainer(btree.BTreeContainer):
   ...     """Demo container."""
@@ -188,7 +188,7 @@ Let's show how we can register a jsonrpc view for the container:
 (The container class needs permission configuration too)
 
   >>> context = xmlconfig.file('meta.zcml', z3c.jsonrpc)
-  >>> context = xmlconfig.file('meta.zcml', zope.app.component, context)
+  >>> context = xmlconfig.file('meta.zcml', zope.security, context)
   >>> context = xmlconfig.string("""
   ... <configure
   ...     xmlns:z3c="http://namespaces.zope.org/z3c"
@@ -429,7 +429,7 @@ need to replace our IJSONReader utility:
 
 also setup the site hook:
 
-  >>> from zope.app.component import hooks
+  >>> from zope.component import hooks
   >>> hooks.setSite(site)
 
 and just call a method this will now raise a ResponseError:
