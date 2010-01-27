@@ -7,7 +7,7 @@ CHANGES
 
 - cleanup setup dependencies, adjust ftesting.zcml
 
-- adjust coverag report setup
+- adjust coverage report setup
 
 - implemented error view concept which will work with ZopePublication
 
@@ -16,7 +16,7 @@ CHANGES
 - use DirectResult in response
 
 - removed unauthenticated error view. This was not working and requires a
-  custom concept supported by the used java script library used at client 
+  custom concept supported by the used java script library used at client
   side
 
 
@@ -35,7 +35,7 @@ Version 0.5.3 (2009-03-10)
 - Fix: The default skin didn't get applied based on the inherited concept give
   from the zope.publisher.browser implementation because our JSON-RPC request
   doesn't provide IBrowserRequest. Added a workaround which will apply a given
-  IDefaultSkin during request instance creation. 
+  IDefaultSkin during request instance creation.
 
 
 Version 0.5.2 (2009-02-24)
