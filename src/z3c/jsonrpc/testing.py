@@ -17,11 +17,10 @@ $Id:$
 __docformat__ = "reStructuredText"
 
 import StringIO
-
+import doctest
 import persistent
 import zope.interface
 import zope.testing.cleanup
-from zope.testing import doctest
 from zope.app.testing import functional
 
 from z3c.json.interfaces import IJSONReader

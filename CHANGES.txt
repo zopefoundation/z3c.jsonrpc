@@ -5,7 +5,8 @@ CHANGES
 0.7.0 (unreleased)
 ------------------
 
-- ...
+- import doctest from python
+
 
 0.6.0 (2010-01-27)
 ------------------
