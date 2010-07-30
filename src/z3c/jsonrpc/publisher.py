@@ -34,6 +34,7 @@ from z3c.json.interfaces import IJSONReader
 from z3c.json.interfaces import IJSONWriter
 from z3c.json.converter import premarshal
 from z3c.jsonrpc import interfaces
+from z3c.jsonrpc import exception
 
 JSON_RPC_VERSION = '2.0'
 
@@ -152,7 +153,7 @@ class JSONRPCRequest(HTTPRequest):
         except:
             # catch any error since we don't know which library is used as 
             # parser
-            raise ParseError
+            raise exception.ParseError
         # get the params
         params = data.get('params', [])
         if self.jsonId is None:

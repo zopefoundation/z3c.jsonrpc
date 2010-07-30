@@ -5,6 +5,8 @@ CHANGES
 0.7.0 (unreleased)
 ------------------
 
+- Fix: added missing exception import for ParseError in publisher.processInputs
+
 - import doctest from python
 
 
