@@ -377,7 +377,7 @@ class JSONRPCResponse(HTTPResponse):
             # if we didn't define an IJSONRPCErrorView for a given error
             wrapper = {'jsonrpc': self._request.jsonVersion,
                        'error': {'code': -32603,
-                                 'message': 'Invalid JSON-RPC',
+                                 'message': 'Internal error',
                                  'data': s},
                        'id': self._request.jsonId}
 
