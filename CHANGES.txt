@@ -5,7 +5,8 @@ CHANGES
 0.7.1 (unreleased)
 ------------------
 
-- ...
+- Fix ``JSONRPCTestTransport`` to include the request full host.
+  Until now it ate the port.
 
 
 0.7.0 (2012-03-25)

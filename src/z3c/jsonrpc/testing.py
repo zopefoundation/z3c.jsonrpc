@@ -44,7 +44,7 @@ from z3c.jsonrpc.publisher import JSON_RPC_VERSION
 class JSONRPCTestTransport(Transport):
     """Test transport that delegates to zope.app.testing.functional.HTTPCaller.
 
-    It can be used like a normal transport, including support for basic 
+    It can be used like a normal transport, including support for basic
     authentication.
     """
 
@@ -61,6 +61,7 @@ class JSONRPCTestTransport(Transport):
             request += "Authorization: %s\n" % (
                 dict(extra_headers)["Authorization"],)
 
+        request += "Host: %s\n" % host
         request += "\n" + request_body
         caller = HTTPCaller()
         response = caller(request, handle_errors=self.handleErrors)
@@ -80,7 +81,7 @@ class JSONRPCTestTransport(Transport):
 
 def JSONRPCTestProxy(uri, transport=None, encoding=None, verbose=None,
     jsonId=None, handleErrors=True, jsonVersion=JSON_RPC_VERSION):
-    """A factory that creates a server proxy using the ZopeJSONRPCTestTransport 
+    """A factory that creates a server proxy using the ZopeJSONRPCTestTransport
     by default."""
     if verbose is None:
         verbose = 0
@@ -98,7 +99,7 @@ def JSONRPCTestProxy(uri, transport=None, encoding=None, verbose=None,
 ###############################################################################
 
 functional.defineLayer("JSONRPCTestingLayer", "ftesting.zcml")
- 
+
 
 ###############################################################################
 #
@@ -189,15 +190,15 @@ class HTTPCaller(functional.HTTPCaller):
         request_cls, publication_cls = \
             super(HTTPCaller, self).chooseRequestClass(method, path,
                 environment)
-        
+
         content_type = environment.get('CONTENT_TYPE', '')
         is_json = content_type.startswith('application/json')
-    
+
         if method in ('GET', 'POST', 'HEAD'):
             if (method == 'POST' and is_json):
                 request_cls = JSONRPCRequest
                 publication_cls = JSONRPCPublication
-    
+
         return request_cls, publication_cls
 
 
@@ -260,7 +261,7 @@ class NoCopyDict(dict):
 
 class FakeModule:
     """A fake module."""
-    
+
     def __init__(self, dict):
         self.__dict = dict
 
@@ -278,7 +279,7 @@ def setUpTestAsModule(test, name=None):
         else:
             name = test.globs.name
 
-    test.globs['__name__'] = name 
+    test.globs['__name__'] = name
     test.globs = NoCopyDict(test.globs)
     sys.modules[name] = FakeModule(test.globs)
 
