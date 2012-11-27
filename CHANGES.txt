@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-0.7.1 (unreleased)
+0.7.1 (2012-11-27)
 ------------------
 
 - Fix ``JSONRPCTestTransport`` to include the request full host.
