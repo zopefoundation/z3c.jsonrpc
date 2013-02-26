@@ -98,7 +98,8 @@ def JSONRPCTestProxy(uri, transport=None, encoding=None, verbose=None,
 #
 ###############################################################################
 
-functional.defineLayer("JSONRPCTestingLayer", "ftesting.zcml")
+functional.defineLayer("JSONRPCTestingLayer", "ftesting.zcml",
+                       allow_teardown=True)
 
 
 ###############################################################################
