@@ -406,7 +406,7 @@ error with additional error content:
   >>> proxy.forceValueError()
   Traceback (most recent call last):
   ...
-  ResponseError: Check proxy.error for error message
+  ResponseError: Received error from server: ...
 
 and the error content looks like:
 

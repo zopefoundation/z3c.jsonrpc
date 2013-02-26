@@ -16,7 +16,6 @@
 $Id:$
 """
 import os
-import xml.sax.saxutils
 from setuptools import setup, find_packages
 
 def read(*rnames):
@@ -55,10 +54,11 @@ setup (
     url = 'http://pypi.python.org/pypi/z3c.jsonrpc',
     packages = find_packages('src'),
     include_package_data = True,
-    package_dir = {'':'src'},
+    package_dir = {'': 'src'},
     namespace_packages = ['z3c'],
     extras_require = dict(
         test = [
+            'z3c.json >= 0.5.5', # error message spelling changed
             'z3c.coverage',
             'zope.app.testing',
             'zope.security',
