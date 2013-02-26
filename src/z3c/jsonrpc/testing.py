@@ -63,6 +63,8 @@ class JSONRPCTestTransport(Transport):
 
         request += "Host: %s\n" % host
         request += "\n" + request_body
+        assert isinstance(request_body, bytes) # HTTPCaller won't like unicode
+        assert isinstance(request, bytes) # make sure handler/body are also bytes
         caller = HTTPCaller()
         response = caller(request, handle_errors=self.handleErrors)
 
@@ -79,7 +81,7 @@ class JSONRPCTestTransport(Transport):
             StringIO.StringIO(response.getBody()), sock=None)
 
 
-def JSONRPCTestProxy(uri, transport=None, encoding=None, verbose=None,
+def JSONRPCTestProxy(uri, transport=None, encoding='UTF-8', verbose=None,
     jsonId=None, handleErrors=True, jsonVersion=JSON_RPC_VERSION):
     """A factory that creates a server proxy using the ZopeJSONRPCTestTransport
     by default."""
