@@ -109,7 +109,7 @@ class JSONRPCRequest(HTTPRequest):
     jsonId = None
 
     zope.interface.implements(interfaces.IJSONRPCRequest,
-        interfaces.IJSONRPCApplicationRequest)
+                              interfaces.IJSONRPCApplicationRequest)
 
     def __init__(self, body_instream, environ, response=None):
         self.form = {}
@@ -230,7 +230,7 @@ class JSONRPCRequest(HTTPRequest):
                 self.jsonVersion
         self._args = tuple(args)
         # make environment, cookies, etc., available to request.get()
-        super(JSONRPCRequest,self).processInputs()
+        super(JSONRPCRequest, self).processInputs()
         self._environ['JSONRPC_MODE'] = True
 
         # split here on '.' for get path suffix steps
@@ -322,14 +322,16 @@ class JSONRPCResponse(HTTPResponse):
             if jsonVersion == "1.0":
                 wrapper = {'result': result, 'error': None, 'id': jsonId}
             elif jsonVersion == "1.1":
-                wrapper = {'version': jsonVersion, 'result': result, 'id': jsonId}
+                wrapper = {
+                    'version': jsonVersion, 'result': result, 'id': jsonId}
             else:
-                wrapper = {'jsonrpc': jsonVersion, 'result': result, 'id': jsonId}
+                wrapper = {
+                    'jsonrpc': jsonVersion, 'result': result, 'id': jsonId}
             json = zope.component.getUtility(IJSONWriter)
             encoding = getCharsetUsingRequest(self._request)
             result = json.write(wrapper)
             body = self._prepareResult(result)
-            super(JSONRPCResponse,self).setResult(DirectResult((body,)))
+            super(JSONRPCResponse, self).setResult(DirectResult((body,)))
             logger.log(DEBUG, "%s" % result)
 
     def _prepareResult(self, result):
@@ -347,8 +349,8 @@ class JSONRPCResponse(HTTPResponse):
             raise TypeError, "JSON did not return unicode (%s)" % type(result)
 
         # set content type
-        self.setHeader('content-type', "application/x-javascript;charset=%s" \
-            % charset)
+        self.setHeader('content-type', "application/x-javascript;charset=%s"
+                       % charset)
         return body
 
     def handleException(self, exc_info):
