@@ -17,6 +17,7 @@ $Id:$
 __docformat__ = "reStructuredText"
 
 import re
+import sys
 import logging
 
 import zope.interface
