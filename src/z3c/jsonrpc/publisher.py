@@ -226,8 +226,8 @@ class JSONRPCRequest(HTTPRequest):
             elif params is None:
                 args = []
         else:
-            raise TypeError, 'Unsupported JSON-RPC version (%s)' % \
-                self.jsonVersion
+            raise TypeError(
+                'Unsupported JSON-RPC version (%s)' % self.jsonVersion)
         self._args = tuple(args)
         # make environment, cookies, etc., available to request.get()
         super(JSONRPCRequest, self).processInputs()
@@ -346,7 +346,7 @@ class JSONRPCResponse(HTTPResponse):
             charset = encoding
         else:
             # something's wrong. JSON did not return unicode.
-            raise TypeError, "JSON did not return unicode (%s)" % type(result)
+            raise TypeError("JSON did not return unicode (%s)" % type(result))
 
         # set content type
         self.setHeader('content-type', "application/x-javascript;charset=%s"
