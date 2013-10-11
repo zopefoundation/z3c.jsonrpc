@@ -17,11 +17,11 @@ $Id:$
 __docformat__ = "reStructuredText"
 
 import re
-import traceback
 import logging
 
 import zope.interface
 import zope.component
+from zope.exceptions.exceptionformatter import format_exception
 from zope.location.location import Location
 from zope.i18n.interfaces import IUserPreferredCharsets
 from zope.publisher.http import HTTPRequest
@@ -79,26 +79,26 @@ class MethodTraverser(object):
 
 class JSONRPCRequest(HTTPRequest):
     """JSON-RPC request implementation based on IHTTPRequest.
-    
+
     This implementation supports the following JSON-RPC Specification versions:
-    
+
     - 1.0
     - 1.1
     - 2.0
-    
+
     Version 1.0 and 1.1 offers params as a list. This params get converted to
     positional arguments if calling the JSON-RPC function.
-    
-    The version 2.0 offers support for named key/value params. The important 
-    thing to know is that this implementation will convert named params kwargs 
-    to form paramters. This means the method doesn't get any key word argument. 
-    The reason why I was choosing is the existing publisher implementation and 
-    it's debugger integration. If someone likes to integrate **kwargs support, 
-    take a look at the publisher.publish method and it's mapply function which 
-    get wrapped by the Debugger class. I hope that's fine for now and I 
+
+    The version 2.0 offers support for named key/value params. The important
+    thing to know is that this implementation will convert named params kwargs
+    to form paramters. This means the method doesn't get any key word argument.
+    The reason why I was choosing is the existing publisher implementation and
+    it's debugger integration. If someone likes to integrate **kwargs support,
+    take a look at the publisher.publish method and it's mapply function which
+    get wrapped by the Debugger class. I hope that's fine for now and I
     recommend to avoid kwargs for JSON-RPC methods ;-)
 
-    The z3c.jsonrpcclient JavaScript method JSONRPCProxy converts a 
+    The z3c.jsonrpcclient JavaScript method JSONRPCProxy converts a
     typeof object as arguments[0] to named key/value pair arguments.
 
     """
@@ -151,7 +151,7 @@ class JSONRPCRequest(HTTPRequest):
         try:
             data = json.read(input)
         except:
-            # catch any error since we don't know which library is used as 
+            # catch any error since we don't know which library is used as
             # parser
             raise exception.ParseError
         # get the params
@@ -160,8 +160,8 @@ class JSONRPCRequest(HTTPRequest):
             self.jsonId = data.get('id', self._jsonId)
 
         # get the json version. The version 1.0 offers no version argument.
-        # The version 1.1 offers a version key and since version 2.0 the 
-        # version is given with the ``jsonrpc`` key. Let's try to find the 
+        # The version 1.1 offers a version key and since version 2.0 the
+        # version is given with the ``jsonrpc`` key. Let's try to find the
         # version for our request.
         self.jsonVersion = data.get('version', self.jsonVersion)
         self.jsonVersion = data.get('jsonrpc', self.jsonVersion)
@@ -172,7 +172,7 @@ class JSONRPCRequest(HTTPRequest):
                 # version 1.0 and 1.1 uses a list of arguments
                 for arg in args:
                     if isinstance(arg, dict):
-                        # set every dict key value as form items and support at 
+                        # set every dict key value as form items and support at
                         # least ``:list`` and ``:tuple`` input field name postifx
                         # conversion.
                         for key, d in arg.items():
@@ -193,20 +193,20 @@ class JSONRPCRequest(HTTPRequest):
                 # This means this library will not support key word arguments
                 # for method calls. It will instead store them in the form.
                 # This has two reasons.
-                # 1. Zope doesn't support kwargs in the publication 
+                # 1. Zope doesn't support kwargs in the publication
                 #    implementation. It only supports positional arguments
                 # 2. The JSON-RPC specification doesn't allow to use positional
                 #     and keyword arguments on one method call
-                # 3. Python doesn't allow to convert kwargs to positional 
+                # 3. Python doesn't allow to convert kwargs to positional
                 #    arguments because a dict doesn't provide an order
                 # This means you should avoid to call a method with kwargs.
                 # just use positional arguments if possible. Or get them from
                 # directly from the request or request.form argument in your
                 # code. Let me know if this is a real problem for you and you
-                # like to implement a different kwarg handling. We have some 
+                # like to implement a different kwarg handling. We have some
                 # ideas for add support for this.
                 args = params
-                # set every dict key value as form items and support at 
+                # set every dict key value as form items and support at
                 # least ``:list`` and ``:tuple`` input field name postifx
                 # conversion.
                 for key, d in args.items():
@@ -268,14 +268,14 @@ class JSONRPCResponse(HTTPResponse):
     def setResult(self, result):
         """The result dict contains the following key value pairs
 
-        The version 1.0 and 1.1 provides a response dict with the following 
+        The version 1.0 and 1.1 provides a response dict with the following
         arguments:
 
         id -- json request id
         result -- result or null on error
         error -- error or null if result is Ok
 
-        The version 2.0 provides a response dict with the following named 
+        The version 2.0 provides a response dict with the following named
         paramters:
 
         jsonrpc -- jsonrpc version 2.0 or higher in future versions
@@ -302,7 +302,7 @@ class JSONRPCResponse(HTTPResponse):
                                      'message': result.message,
                                      'data': result.data},
                            'id': self._request.jsonId}
-    
+
             try:
                 json = zope.component.getUtility(IJSONWriter)
                 result = json.write(wrapper)
@@ -355,14 +355,10 @@ class JSONRPCResponse(HTTPResponse):
         # by this method. All exceptions where we have a view registered for
         # get handled by the setResult method based on the given
         # IJSONRPCErrorView
+        logger.log(logging.ERROR, "".join(format_exception(
+            exc_info[0], exc_info[1], exc_info[2], with_filenames=True)))
+
         t, value = exc_info[:2]
-        exc_data = []
-        for file, lineno, function, text in traceback.extract_tb(exc_info[2]):
-            exc_data.append("%s %s %s %s %s" % (file, "line",
-                lineno, "in", function))
-            exc_data.append("%s %s" % ( "=>", repr(text)))
-            exc_data.append( "** %s: %s" % exc_info[:2])
-        logger.log(logging.ERROR, "\n".join(exc_data))
         s = '%s: %s' % (getattr(t, '__name__', t), value)
         if self._request.jsonVersion == "1.0":
             wrapper = {'result': None,

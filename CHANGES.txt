@@ -5,7 +5,7 @@ CHANGES
 0.7.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- ``handleException``: provide human readable traceback
 
 
 0.7.1 (2012-11-27)

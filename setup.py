@@ -75,6 +75,7 @@ setup (
         'zope.app.publication',
         'zope.component',
         'zope.configuration',
+        'zope.exceptions',
         'zope.i18n',
         'zope.i18nmessageid',
         'zope.interface',
